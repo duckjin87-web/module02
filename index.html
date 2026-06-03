@@ -1799,12 +1799,31 @@ function buildUrlFallbackChain(rawUrl) {
   ])];
 }
 
-// [B-2] SPA 감지 (JS 전용 빈 응답)
+// [B-2] SPA 감지 (JS 전용 빈 응답) — Next.js/Nuxt/imweb/카페24 지문 포함
 function isSPAResponse(text) {
   if (!text || text.trim().length < 500) return true;
+  // SPA 프레임워크 지문 직접 감지
+  const spaFingerprints = [
+    '__NEXT_DATA__',        // Next.js
+    '__NUXT__',             // Nuxt.js
+    '__NEXT_REDUX_STORE__', // Next.js + Redux
+    'data-reactroot',       // React SSR
+    'ng-version=',          // Angular
+    '__vue__',              // Vue devtools
+    'window.__INITIAL_STATE__',
+    'window.__PRELOADED_STATE__',
+    // imweb/카페24/고도몰 빌더
+    'imweb.me',
+    'cafe24.com/js',
+    'godo.kr/js',
+    'makeshop.co.kr',
+    'shopby.co.kr',
+  ];
+  if (spaFingerprints.some(fp => text.includes(fp))) return true;
   const sc = (text.match(/<script/gi) || []).length;
   const tc = text.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim().length;
-  return sc >= 6 && tc < 200;
+  // 스크립트 4개 이상 + 텍스트 300자 미만이면 SPA로 판단 (기준 완화)
+  return sc >= 4 && tc < 300;
 }
 
 // [B-1/B-3] 전역 프록시 래퍼 (crawlManualUrl 내부 fetchWithProxy 스코프 버그 수정)
@@ -1817,7 +1836,7 @@ const _PROXY_CHAIN_G = [
 async function fetchWithProxyGlobal(targetUrl) {
   for (const makeProxy of _PROXY_CHAIN_G) {
     try {
-      const resp = await fetchTimeout(makeProxy(targetUrl), {}, 12000);
+      const resp = await fetchTimeout(makeProxy(targetUrl), {}, 5000);
       if (!resp.ok) continue;
       const buf = await resp.arrayBuffer();
       const ct  = resp.headers.get('content-type') || '';
@@ -1833,7 +1852,12 @@ async function fetchWithProxyGlobal(targetUrl) {
           ? (() => { try { return new TextDecoder('euc-kr').decode(buf); } catch { return u8; } })()
           : u8;
       }
-      if (text.length > 300 && !text.includes('Host not in allowlist') && !isSPAResponse(text)) return text;
+      const isBlocked =
+        text.includes('Host not in allowlist') ||
+        text.includes('"contents":null') ||
+        text.includes('"status":{"http_code":0}') ||
+        (text.includes('login') && text.includes('password') && text.length < 3000);
+      if (text.length > 300 && !isBlocked && !isSPAResponse(text)) return text;
     } catch { /* 다음 프록시 */ }
   }
   return null;
@@ -7367,17 +7391,23 @@ async function crawlManualUrl(code) {
       addLog(`[연결] ${_label} 시도 중...`);
       try {
         const proxyUrl = makeProxy(targetUrl);
-        const resp = await fetchTimeout(proxyUrl, {}, 8000);
+        const resp = await fetchTimeout(proxyUrl, {}, 5000);
         if (!resp.ok) { addLog(`[SKIP] ${_label} — HTTP ${resp.status}`, 'warn'); continue; }
         const buf  = await resp.arrayBuffer();
         const ct   = resp.headers.get('content-type') || '';
         const text = decodeBuffer(buf, ct);
-        const isBlockedResp = 
+        const isBlockedResp =
           text.includes('Host not in allowlist') ||
           text.toLowerCase().startsWith('access denied') ||
           /"error"\s*:\s*"[^"]{3,}"/.test(text) ||
           text.includes('403 Forbidden') ||
           text.includes('ERR_ACCESS_DENIED') ||
+          // allorigins 차단 응답
+          text.includes('"contents":null') ||
+          text.includes('"status":{"http_code":0}') ||
+          // 로그인 리다이렉트 페이지 (실제 콘텐츠 없음)
+          (text.includes('login') && text.includes('password') && text.length < 3000) ||
+          // 빈 응답 또는 너무 짧음
           text.trim() === '' ||
           (text.length < 200);
         if (!isBlockedResp) return text;
@@ -7389,16 +7419,18 @@ async function crawlManualUrl(code) {
   // 영문 페이지 자동 탐색 (/en/, /english/ 등)
   async function fetchEnglishPage(baseUrl) {
     const base = baseUrl.replace(/\/$/, '');
-    // [FIX2] 경로 2개로 축소 + 각 3초 타임아웃 → 최대 6초
     const enPaths = ['/en/', '/english/'];
     for (const ep of enPaths) {
+      let timer;
       try {
+        // fetchWithProxy 자체가 5초×4=최대20초이므로 8초 상한으로 race
         const t = await Promise.race([
           fetchWithProxy(base + ep),
-          new Promise(r => setTimeout(() => r(null), 3000))
+          new Promise(r => { timer = setTimeout(() => r(null), 8000); })
         ]);
+        clearTimeout(timer);
         if (t && t.length > 300 && !isEucKr(t)) return { text: t, path: ep };
-      } catch {}
+      } catch { clearTimeout(timer); }
     }
     return null;
   }
@@ -7422,14 +7454,15 @@ async function crawlManualUrl(code) {
     return [...new Set(imgs)].slice(0, 8); // 최대 8개
   }
 
-  // Tesseract.js OCR — 이미지에서 텍스트 추출
+  // Tesseract.js OCR — 이미지에서 텍스트 추출 (12초 타임아웃)
   async function ocrImage(imgUrl) {
     if (typeof Tesseract === 'undefined') return '';
     try {
-      const { data } = await Tesseract.recognize(imgUrl, 'kor+eng', {
-        logger: () => {}
-      });
-      return data.text || '';
+      const result = await Promise.race([
+        Tesseract.recognize(imgUrl, 'kor+eng', { logger: () => {} }),
+        new Promise((_, rej) => setTimeout(() => rej(new Error('ocr_timeout')), 12000))
+      ]);
+      return result.data.text || '';
     } catch { return ''; }
   }
 
@@ -7465,6 +7498,11 @@ async function crawlManualUrl(code) {
     u => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
     u => `https://corsproxy.io/?url=${encodeURIComponent('http://'+u.replace(/^https?:\/\//,''))}`,
   ];
+
+  // 전체 크롤링 60초 상한선 — CRAWL_PATHS 실패 누적 방지
+  const _crawlDeadline = Date.now() + 60000;
+  function crawlTimedOut() { return Date.now() > _crawlDeadline; }
+
   updateCrawlStage(0,'active'); // 영문탐색 시작
   addLog(`[1차] 영문 페이지 탐색 시작...`);
   const baseUrlClean = url.replace(/\/$/, '');
@@ -7555,6 +7593,7 @@ async function crawlManualUrl(code) {
 
     for (const path of CRAWL_PATHS) {
     if (crawledPages >= MAX_PAGES) break;
+    if (crawlTimedOut()) { addLog('[타임아웃] 60초 초과 — 크롤링 조기 종료', 'warn'); break; }
     const pageUrl = baseUrlClean + path;
     const text = await fetchWithProxy(pageUrl);
     if (!text) continue;
