@@ -7491,9 +7491,9 @@ async function crawlManualUrl(code) {
           text.includes('"status":{"http_code":0}') ||
           // 로그인 리다이렉트 페이지 (실제 콘텐츠 없음)
           (text.includes('login') && text.includes('password') && text.length < 3000) ||
-          // 빈 응답 또는 너무 짧음
+          // 빈 응답 또는 너무 짧음 (한국어 포함 시 예외)
           text.trim() === '' ||
-          (text.length < 200);
+          (text.length < 100 && !/[가-힣]{4,}/.test(text));
         if (!isBlockedResp) return text;
       } catch { /* 다음 프록시 */ }
     }
@@ -7801,6 +7801,15 @@ async function crawlManualUrl(code) {
         addLog('  ① SPA(React/Next.js) — JS 실행 전 콘텐츠 없음', 'warn');
         addLog('  ② 모든 경로가 동일 응답 반환 (리다이렉트)', 'warn');
         addLog('  ③ 화장품 텍스트가 이미지로만 존재', 'warn');
+        // 식약처 데이터 기반 자동 키워드 생성
+        const _mfdsEl = _mfds.selected;
+        if (_mfdsEl) {
+          const ind = (_mfdsEl.INDUTY || '');
+          if (ind.includes('화장품')) foundKeywords.push('화장품제조업');
+          if (ind.includes('의약외품')) foundKeywords.push('의약외품겸업');
+          if (foundKeywords.length > 0)
+            addLog(`[MFDS폴백] 업종(${ind})에서 키워드 자동 추가 → ${foundKeywords.join(', ')}`, 'warn');
+        }
         // 수동 입력 UI를 결과 영역에 표시
         const resDiv = document.createElement('div');
         resDiv.id = 'm5-manual-kw-input';
@@ -7883,6 +7892,52 @@ async function crawlManualUrl(code) {
       }
 
   } // end if crawledPages > 0
+
+  // ─── MFDS 데이터 기반 키워드 폴백 (크롤링 0페이지 or 키워드 0개) ───
+  if (!_mfds.crawlData.hpKeywords?.length) {
+    const sel = _mfds.selected;
+    const dbEntry = _mfds.code ? DB.find(x => x.code === _mfds.code) : null;
+    const fallbackKws = [];
+
+    if (sel) {
+      const ind = (sel.INDUTY || '');
+      if (ind.includes('화장품')) fallbackKws.push('화장품제조업');
+      if (ind.includes('의약외품')) fallbackKws.push('의약외품겸업');
+      if (ind && !fallbackKws.some(k => k === ind)) fallbackKws.push(ind);
+      // 지역 키워드
+      const sido = (sel.FACTORY_ADDR || '').split(' ')[0];
+      if (sido && sido.length <= 4 && sido.length > 1) fallbackKws.push(sido + '소재');
+    }
+    // 기존 DB 태그 활용
+    if (dbEntry) {
+      (dbEntry.tags || []).slice(0, 12).forEach(t => {
+        if (!fallbackKws.includes(t)) fallbackKws.push(t);
+      });
+    }
+    if (fallbackKws.length > 0) {
+      addLog(`[MFDS폴백] 크롤링 실패 — 식약처 데이터로 키워드 ${fallbackKws.length}개 자동 생성`, 'warn');
+      _mfds.crawlData.hpKeywords = fallbackKws;
+      // 결과 UI 표시
+      if (resultEl) {
+        const tagHtml = fallbackKws.map(k =>
+          `<span style="font-size:10px;padding:2px 7px;border-radius:10px;
+            background:rgba(245,158,11,.13);color:var(--yel);white-space:nowrap">📌 ${k}</span>`
+        ).join('');
+        resultEl.innerHTML = `
+          <div style="background:rgba(245,158,11,.06);border:1px solid var(--yel);
+            border-radius:var(--r);padding:8px 10px;margin-top:6px">
+            <div style="font-size:11px;font-weight:600;color:var(--yel);margin-bottom:6px">
+              🟡 자동 크롤링 실패 — 식약처 데이터 기반 ${fallbackKws.length}개 태그
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px">${tagHtml}</div>
+            <div style="font-size:10px;color:var(--txt3)">
+              홈페이지 직접 확인 후 수동으로 태그를 추가하거나 DB 반영 버튼을 클릭하세요
+            </div>
+          </div>`;
+        resultEl.style.display = 'block';
+      }
+    }
+  }
 
   if (crawlSuccess) return;
 
@@ -8023,6 +8078,18 @@ async function crawlManualUrl(code) {
     '동물실험 없음':'동물실험없음','Cruelty-Free':'동물실험없음',
     '기능성화장품':'기능성화장품','자외선차단':'선케어기능성','미백':'미백기능성',
     '주름개선':'주름개선기능성','탈모':'탈모기능성',
+    // 헤어 / 의약외품
+    '퍼머넌트웨이브':'퍼머넌트(의약외품)','퍼머넌트':'퍼머넌트(의약외품)',
+    '퍼머':'퍼머(의약외품)','파마':'파마(의약외품)',
+    '염모제':'염모제(의약외품)','염모':'염모제(의약외품)',
+    '탈색제':'탈색제(의약외품)','탈색':'탈색제(의약외품)',
+    '스트레이트크림':'스트레이트크림(의약외품)','스트레이트':'스트레이트크림(의약외품)',
+    '두발용':'두발용화장품','모발':'모발케어','두피':'두피케어','두피케어':'두피케어',
+    '헤어컬러':'헤어컬러','헤어다이':'헤어다이','헤어마스크':'헤어마스크팩',
+    '헤어오일':'헤어오일','컨디셔너':'헤어컨디셔너',
+    // 제조업 일반
+    '화장품제조업':'화장품제조업','화장품제조':'화장품제조',
+    '화장품공장':'화장품제조공장','제조공장':'화장품제조공장',
   };
 
   function extractByRegex(text) {
