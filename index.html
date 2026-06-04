@@ -4807,15 +4807,33 @@ async function testNaverKey() {
   const resEl = document.getElementById('naver-test-result');
   if (resEl) { resEl.style.display = 'block'; resEl.innerHTML = '<span class="spinner"></span> 테스트 중...'; }
 
+  const naverHeaders = { 'X-Naver-Client-Id': cid, 'X-Naver-Client-Secret': sec };
+  const apiUrl = `https://openapi.naver.com/v1/search/webkr.json?query=${encodeURIComponent('한국콜마 화장품')}&display=3`;
+
   try {
-    const url = `https://openapi.naver.com/v1/search/webkr.json?query=${encodeURIComponent('한국콜마 화장품')}&display=3`;
-    const resp = await fetchTimeout(url, {
-      headers: {
-        'X-Naver-Client-Id': cid,
-        'X-Naver-Client-Secret': sec,
-      }
-    }, 8000);
+    let resp;
+    // 직접 호출 시도 → CORS 실패 시 corsproxy.io 경유
+    try {
+      resp = await fetchTimeout(apiUrl, { headers: naverHeaders }, 5000);
+    } catch(corsErr) {
+      const proxyUrl = `https://corsproxy.io/?url=${encodeURIComponent(apiUrl)}`;
+      resp = await fetchTimeout(proxyUrl, { headers: naverHeaders }, 8000);
+    }
+
+    if (resp.status === 401 || resp.status === 403) {
+      if (resEl) resEl.innerHTML = `<span style="color:var(--red)">❌ 인증 실패 (${resp.status}) — Client ID / Secret을 확인하세요</span>`;
+      return;
+    }
+    if (!resp.ok) {
+      if (resEl) resEl.innerHTML = `<span style="color:var(--red)">❌ API 오류 (HTTP ${resp.status})</span>`;
+      return;
+    }
+
     const data = await resp.json();
+    if (data.errorCode) {
+      if (resEl) resEl.innerHTML = `<span style="color:var(--red)">❌ ${data.errorMessage} (${data.errorCode})</span>`;
+      return;
+    }
     if (data.items?.length > 0) {
       const domains = data.items.map(it => it.link.replace(/^https?:\/\//,'').split('/')[0]).slice(0,3);
       if (resEl) resEl.innerHTML = `<span style="color:var(--grn)">✅ 연동 성공! 검색결과 ${data.total}건 | 도메인: ${domains.join(', ')}</span>`;
@@ -4824,7 +4842,10 @@ async function testNaverKey() {
       if (resEl) resEl.innerHTML = `<span style="color:var(--yel)">⚠ 결과 없음 (API 연결은 정상)</span>`;
     }
   } catch(e) {
-    if (resEl) resEl.innerHTML = `<span style="color:var(--red)">❌ 오류: ${e.message?.slice(0,50)} — Client Secret을 확인하세요</span>`;
+    const isCors = e.message?.includes('CORS') || e.message?.includes('Failed to fetch') || e.message?.includes('NetworkError');
+    if (resEl) resEl.innerHTML = isCors
+      ? `<span style="color:var(--red)">❌ CORS 차단 — 네이버 개발자센터에서 사용 환경에 <b>${location.hostname}</b> 도메인을 등록해주세요</span>`
+      : `<span style="color:var(--red)">❌ 오류: ${e.message?.slice(0,60)}</span>`;
   }
 }
 
@@ -6562,25 +6583,36 @@ async function runMfdsStep5() {
         try {
           let domains_from_search = [];
 
-          // ── Naver Search API 우선 시도 ──────────────────────
+          // ── Naver Search API 우선 시도 (직접 → corsproxy 폴백) ──
           if (naverCid && naverSec) {
             try {
               const naverUrl = `https://openapi.naver.com/v1/search/webkr.json?query=${encodeURIComponent(sq.q)}&display=10`;
-              const nResp = await fetchTimeout(naverUrl, {
-                headers: {
-                  'X-Naver-Client-Id': naverCid,
-                  'X-Naver-Client-Secret': naverSec,
-                }
-              }, 8000);
-              if (nResp.ok) {
+              const naverHdrs = { 'X-Naver-Client-Id': naverCid, 'X-Naver-Client-Secret': naverSec };
+              let nResp;
+              try {
+                // 1차: 직접 호출
+                nResp = await fetchTimeout(naverUrl, { headers: naverHdrs }, 5000);
+              } catch {
+                // 2차: CORS 차단 시 corsproxy.io 경유 (헤더 포워딩 지원)
+                addLog('[NAVER] 직접 호출 CORS 차단 → corsproxy 경유 재시도...', 'warn');
+                const proxyUrl = `https://corsproxy.io/?url=${encodeURIComponent(naverUrl)}`;
+                nResp = await fetchTimeout(proxyUrl, { headers: naverHdrs }, 8000);
+              }
+              if (nResp?.ok) {
                 const nData = await nResp.json();
-                domains_from_search = (nData.items || [])
-                  .map(it => it.link.replace(/^https?:\/\//,'').split('/')[0])
-                  .filter(isDomainOk);
-                addLog(`[NAVER] ${sq.label} → ${domains_from_search.length}개 도메인`, 'ok');
+                if (nData.errorCode) {
+                  addLog(`[NAVER] API 오류: ${nData.errorMessage} (${nData.errorCode})`, 'warn');
+                } else {
+                  domains_from_search = (nData.items || [])
+                    .map(it => it.link.replace(/^https?:\/\//,'').split('/')[0])
+                    .filter(isDomainOk);
+                  addLog(`[NAVER] ${sq.label} → ${domains_from_search.length}개 도메인`, 'ok');
+                }
+              } else if (nResp?.status === 401 || nResp?.status === 403) {
+                addLog(`[NAVER] 인증 실패 (${nResp.status}) — Client ID/Secret 확인 필요`, 'warn');
               }
             } catch(ne) {
-              addLog(`[WARN] Naver API 실패: ${ne.message?.slice(0,30)} → CORS 탐색으로 전환`, 'warn');
+              addLog(`[WARN] Naver API 실패: ${ne.message?.slice(0,40)} → 프록시 탐색으로 전환`, 'warn');
             }
           }
 
