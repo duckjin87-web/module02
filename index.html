@@ -6945,10 +6945,27 @@ async function startStep5Crawl() {
             background:rgba(39,110,241,.12);color:var(--cyn)">${k}</span>`).join('')}
         </div>
       </div>`
-    : `<div style="margin-top:6px;padding:7px 10px;background:rgba(245,158,11,.07);
-        border:1px solid rgba(245,158,11,.25);border-radius:var(--r);font-size:10px;color:var(--yel)">
-        ⚠ 키워드 추출 결과 없음 — SPA 사이트이거나 접근이 차단됐습니다.<br>
-        <span style="color:var(--txt3);font-size:9px">수동으로 태그를 입력하거나 다른 URL을 시도해 보세요.</span>
+    : `<div style="margin-top:6px;padding:9px 12px;background:rgba(245,158,11,.07);
+        border:1px solid rgba(245,158,11,.3);border-radius:var(--r)">
+        <div style="font-size:10px;font-weight:600;color:var(--yel);margin-bottom:5px">
+          🟡 자동 키워드 추출 실패 — 수동 입력 필요
+        </div>
+        <div style="font-size:9px;color:var(--txt3);margin-bottom:6px">
+          SPA(React/Next.js) 사이트이거나 프록시 차단 상태입니다.<br>
+          아래에 직접 태그를 입력하거나 홈페이지를 직접 확인해 주세요.
+        </div>
+        <div style="display:flex;gap:5px">
+          <input type="text" id="step5-manual-kw" placeholder="OEM, CGMP인증, 마스크팩, 헤어케어..."
+            style="flex:1;padding:5px 8px;background:var(--s3);border:1px solid var(--bd);
+            border-radius:var(--r);color:var(--txt);font-size:10px;outline:none">
+          <button onclick="applyStep5ManualKw('${domain}')"
+            style="padding:4px 10px;border-radius:var(--r);border:1px solid var(--acc);
+            background:var(--acc);color:#fff;font-size:10px;cursor:pointer;white-space:nowrap">추가</button>
+        </div>
+        <div style="margin-top:5px;font-size:9px;color:var(--txt3)">
+          또는 <a href="https://www.google.com/search?q=${encodeURIComponent(domain+' 화장품')}"
+          target="_blank" style="color:var(--cyn)">구글로 확인 →</a>
+        </div>
       </div>`;
 
   const crawlContainer = document.getElementById('m5-crawl');
@@ -6963,6 +6980,30 @@ async function startStep5Crawl() {
 
   const confirm = document.getElementById('m5-direct-confirm');
   if (confirm) confirm.style.display = 'block';
+}
+
+function applyStep5ManualKw(domain) {
+  const inp = document.getElementById('step5-manual-kw');
+  if (!inp || !inp.value.trim()) return;
+  const kws = inp.value.split(/[,，]+/).map(k => k.trim()).filter(Boolean);
+  if (!_mfds.crawlData) _mfds.crawlData = {};
+  if (!_mfds.crawlData.hpKeywords) _mfds.crawlData.hpKeywords = [];
+  kws.forEach(k => { if (!_mfds.crawlData.hpKeywords.includes(k)) _mfds.crawlData.hpKeywords.push(k); });
+  // 결과 요약 갱신
+  const allKws = _mfds.crawlData.hpKeywords;
+  const sumEl = document.getElementById('m5-crawl-result-summary');
+  if (sumEl) {
+    sumEl.innerHTML = `<div style="margin-top:8px;padding:8px 10px;background:rgba(16,185,129,.07);
+      border:1px solid rgba(16,185,129,.25);border-radius:var(--r)">
+      <div style="font-size:10px;font-weight:600;color:var(--grn);margin-bottom:5px">
+        ✅ 수동 입력 완료 — ${allKws.length}개 태그
+      </div>
+      <div style="display:flex;gap:3px;flex-wrap:wrap">
+        ${allKws.map(k=>`<span style="font-size:9px;padding:1px 7px;border-radius:10px;
+          background:rgba(39,110,241,.12);color:var(--cyn)">${k}</span>`).join('')}
+      </div></div>`;
+  }
+  showToast(`✅ 키워드 ${kws.length}개 추가됨`);
 }
 
 function runMfdsStep6() {
@@ -7914,28 +7955,29 @@ async function crawlManualUrl(code) {
         if (!fallbackKws.includes(t)) fallbackKws.push(t);
       });
     }
-    if (fallbackKws.length > 0) {
-      addLog(`[MFDS폴백] 크롤링 실패 — 식약처 데이터로 키워드 ${fallbackKws.length}개 자동 생성`, 'warn');
-      _mfds.crawlData.hpKeywords = fallbackKws;
-      // 결과 UI 표시
-      if (resultEl) {
-        const tagHtml = fallbackKws.map(k =>
-          `<span style="font-size:10px;padding:2px 7px;border-radius:10px;
-            background:rgba(245,158,11,.13);color:var(--yel);white-space:nowrap">📌 ${k}</span>`
-        ).join('');
-        resultEl.innerHTML = `
-          <div style="background:rgba(245,158,11,.06);border:1px solid var(--yel);
-            border-radius:var(--r);padding:8px 10px;margin-top:6px">
-            <div style="font-size:11px;font-weight:600;color:var(--yel);margin-bottom:6px">
-              🟡 자동 크롤링 실패 — 식약처 데이터 기반 ${fallbackKws.length}개 태그
-            </div>
-            <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px">${tagHtml}</div>
-            <div style="font-size:10px;color:var(--txt3)">
-              홈페이지 직접 확인 후 수동으로 태그를 추가하거나 DB 반영 버튼을 클릭하세요
-            </div>
-          </div>`;
-        resultEl.style.display = 'block';
-      }
+    // 절대 마지막 보루 — 도메인 이름이라도 저장 (공백 방지)
+    if (fallbackKws.length === 0) fallbackKws.push('화장품제조업체', domain);
+
+    addLog(`[MFDS폴백] 크롤링 실패 — ${sel?'식약처 업종':'도메인'} 기반 키워드 ${fallbackKws.length}개 자동 생성`, 'warn');
+    _mfds.crawlData.hpKeywords = fallbackKws;
+    // 결과 UI 표시
+    if (resultEl) {
+      const tagHtml = fallbackKws.map(k =>
+        `<span style="font-size:10px;padding:2px 7px;border-radius:10px;
+          background:rgba(245,158,11,.13);color:var(--yel);white-space:nowrap">📌 ${k}</span>`
+      ).join('');
+      resultEl.innerHTML = `
+        <div style="background:rgba(245,158,11,.06);border:1px solid var(--yel);
+          border-radius:var(--r);padding:8px 10px;margin-top:6px">
+          <div style="font-size:11px;font-weight:600;color:var(--yel);margin-bottom:6px">
+            🟡 자동 크롤링 실패 — 기본 키워드 ${fallbackKws.length}개 자동 생성
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px">${tagHtml}</div>
+          <div style="font-size:10px;color:var(--txt3)">
+            홈페이지 직접 확인 후 수동으로 태그를 추가하거나 DB 반영 버튼을 클릭하세요
+          </div>
+        </div>`;
+      resultEl.style.display = 'block';
     }
   }
 
