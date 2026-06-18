@@ -6575,11 +6575,31 @@ async function runMfdsStep5() {
         d && d.includes('.') && d.length < 50 &&
         !EXCLUDE_DOMAINS.some(ex => d.includes(ex));
 
+      // 검색결과 HTML에서 도메인 추출 — Google의 /url?q= 리다이렉트 래핑과
+      // 일반 href 링크를 모두 처리 (기존엔 /url?q= 패턴을 못 잡아 Google 결과를
+      // 거의 추출하지 못했음 — 핵심 버그)
+      function extractDomainsFromHtml(text) {
+        const urls = [];
+        // 1) Google 리다이렉트 래핑: href="/url?q=https://...&sa=..."
+        (text.match(/\/url\?q=(https?:\/\/[^&"]+)/g) || []).forEach(m => {
+          try { urls.push(decodeURIComponent(m.replace(/^\/url\?q=/, ''))); } catch {}
+        });
+        // 2) 일반 href="https://..."
+        (text.match(/href="(https?:\/\/[^"]+)"/g) || []).forEach(m => {
+          urls.push(m.replace(/^href="/, '').replace(/"$/, ''));
+        });
+        // 3) 본문에 노출된 순수 URL
+        (text.match(/https?:\/\/[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}[^\s"'<>]*/g) || []).forEach(u => urls.push(u));
+
+        return [...new Set(
+          urls.map(u => u.replace(/^https?:\/\//, '').split('/')[0].split('?')[0].split('&')[0])
+        )].filter(isDomainOk);
+      }
+
       for (const sq of searchQueries) {
         if (hpCandidates.length >= 5) break; // 이미 충분한 후보 있으면 중단
 
         addLog(`[--] ${sq.label} 검색 중...`);
-        const gUrl = `https://www.google.com/search?q=${encodeURIComponent(sq.q)}&hl=ko&num=10`;
 
         try {
           let domains_from_search = [];
@@ -6617,36 +6637,38 @@ async function runMfdsStep5() {
             }
           }
 
-          // ── Naver API 결과 없을 때 CORS 프록시 fallback (Google → Bing) ─────
+          // ── Naver 결과 없을 때 검색엔진 스크래핑 fallback ──
+          // DuckDuckGo HTML lite → Bing → Google 순서 (스크래핑 차단이 덜한 순)
           if (!domains_from_search.length) {
-            const text = await fetchWithProxyGlobal(gUrl);
-            if (!text) {
-              addLog(`[WARN] ${sq.label} — Google 프록시 차단`, 'warn');
-            } else {
-              domains_from_search = [
-                ...(text.match(/href="https?:\/\/([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})[^"]*"/g) || []),
-                ...(text.match(/https?:\/\/([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})[/"]/g) || []),
-              ].map(m => m.replace(/href="/, '').replace(/^https?:\/\//, '').split('/')[0].split('"')[0])
-               .filter(isDomainOk);
+            const ddgUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(sq.q)}`;
+            const ddgText = await fetchWithProxyGlobal(ddgUrl);
+            if (ddgText) {
+              domains_from_search = extractDomainsFromHtml(ddgText);
+              if (domains_from_search.length) addLog(`[DDG] ${sq.label} → ${domains_from_search.length}개 도메인`, 'ok');
             }
+          }
 
-            // [Bing 보조] Google이 캡차/봇차단으로 결과 없을 때 Bing으로 재시도
-            // (Bing은 프록시 통한 스크래핑 차단이 덜 엄격해 성공률이 높음)
-            if (!domains_from_search.length) {
-              addLog(`[--] ${sq.label} — Bing 검색 보조 시도...`);
-              const bUrl = `https://www.bing.com/search?q=${encodeURIComponent(sq.q)}&setlang=ko`;
-              const bText = await fetchWithProxyGlobal(bUrl);
-              if (bText) {
-                domains_from_search = [
-                  ...(bText.match(/href="https?:\/\/([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})[^"]*"/g) || []),
-                ].map(m => m.replace(/href="/, '').replace(/^https?:\/\//, '').split('/')[0].split('"')[0])
-                 .filter(isDomainOk);
-                if (domains_from_search.length) addLog(`[BING] ${sq.label} → ${domains_from_search.length}개 도메인`, 'ok');
-              } else {
-                addLog(`[WARN] ${sq.label} — Bing도 차단`, 'warn');
-                continue;
-              }
+          if (!domains_from_search.length) {
+            const bUrl = `https://www.bing.com/search?q=${encodeURIComponent(sq.q)}&setlang=ko`;
+            const bText = await fetchWithProxyGlobal(bUrl);
+            if (bText) {
+              domains_from_search = extractDomainsFromHtml(bText);
+              if (domains_from_search.length) addLog(`[BING] ${sq.label} → ${domains_from_search.length}개 도메인`, 'ok');
             }
+          }
+
+          if (!domains_from_search.length) {
+            const gUrl = `https://www.google.com/search?q=${encodeURIComponent(sq.q)}&hl=ko&num=10`;
+            const gText = await fetchWithProxyGlobal(gUrl);
+            if (gText) {
+              domains_from_search = extractDomainsFromHtml(gText);
+              if (domains_from_search.length) addLog(`[GOOGLE] ${sq.label} → ${domains_from_search.length}개 도메인`, 'ok');
+            }
+          }
+
+          if (!domains_from_search.length) {
+            addLog(`[WARN] ${sq.label} — 모든 검색엔진 차단/결과없음`, 'warn');
+            continue;
           }
 
           // ── 이하 공통 처리 ───────────────────────────────────
