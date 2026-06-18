@@ -13,33 +13,53 @@
    CSS 변수 (handover.md 7번 기준)
 ═══════════════════════════════════════ */
 :root {
-  --navy: #1a2440; --acc:  #e8622e; --cyn:  #0891b2;
-  --grn:  #10b981; --red:  #ef4444; --yel:  #f59e0b;
-  --org:  #f97316; --pur:  #8b5cf6;
-  --s1:   #0f172a; --s2:   #1e293b; --s3:   #263352;
-  --bd:   #334155; --txt:  #f1f5f9; --txt2: #94a3b8;
-  --txt3: #475569; --mono: 'Courier New',monospace; --r: 6px;
+  /* ── Kolmar 라이트 블루 팔레트 ── */
+  --navy: #0b1e4a;          /* 딥 네이비 (타이틀용) */
+  --acc:  #276EF1;          /* Innovation Blue (콜마 브랜드 컬러) */
+  --cyn:  #1a60e0;          /* 강조 블루 */
+  --grn:  #059669;
+  --red:  #dc2626;
+  --yel:  #b45309;
+  --org:  #ea580c;
+  --pur:  #5b5bde;
+  --s1:   #eef2ff;          /* 페이지 배경 — 연블루 */
+  --s2:   #ffffff;          /* 카드/패널 — 흰색 */
+  --s3:   #f0f5ff;          /* 입력/3차 — 연한 블루 */
+  --bd:   #c5d5f0;          /* 테두리 — 소프트 블루 */
+  --txt:  #0b1e4a;          /* 메인 텍스트 — 딥 네이비 */
+  --txt2: #2d4a8a;          /* 서브 텍스트 — 미디엄 블루 */
+  --txt3: #7090b8;          /* 3차 텍스트 — 소프트 블루 */
+  --mono: 'Courier New',monospace; --r: 7px;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { background:var(--s1); color:var(--txt);
   font-family:'Malgun Gothic','맑은 고딕',sans-serif; font-size:13px; line-height:1.5; }
+body::before {
+  content:''; position:fixed; top:0; left:0; right:0; height:3px;
+  background:linear-gradient(90deg, var(--acc) 0%, #60a5fa 100%);
+  z-index:9999;
+}
 
 /* ─── 공통 ─── */
-.card { background:var(--s2); border:1px solid var(--bd); border-radius:var(--r); padding:14px; }
+.card {
+  background:var(--s2); border:1px solid var(--bd); border-radius:var(--r); padding:14px;
+  box-shadow:0 1px 4px rgba(39,110,241,.08);
+}
 .btn { padding:5px 12px; border-radius:var(--r); border:1px solid var(--bd);
-  background:var(--s3); color:var(--txt2); font-size:11px; cursor:pointer; transition:.15s; }
-.btn:hover  { border-color:var(--cyn); color:var(--cyn); }
-.btn.acc    { border-color:var(--acc); background:var(--acc); color:#fff; }
-.btn.acc:hover { background:#c9531f; }
-.btn.active { border-color:var(--cyn); color:var(--cyn); background:rgba(8,145,178,.12); }
+  background:var(--s2); color:var(--txt2); font-size:11px; cursor:pointer; transition:.15s;
+  box-shadow:0 1px 2px rgba(39,110,241,.06); }
+.btn:hover  { border-color:var(--acc); color:var(--acc); background:rgba(39,110,241,.05); }
+.btn.acc    { border-color:var(--acc); background:var(--acc); color:#fff; box-shadow:0 2px 8px rgba(39,110,241,.3); }
+.btn.acc:hover { background:#1a55cc; }
+.btn.active { border-color:var(--acc); color:var(--acc); background:rgba(39,110,241,.1); }
 .tag { display:inline-block; font-size:9px; padding:1px 5px; border-radius:10px; }
-.tag-green  { background:rgba(16,185,129,.15); color:var(--grn); }
-.tag-red    { background:rgba(239,68,68,.15);  color:var(--red); }
-.tag-yellow { background:rgba(245,158,11,.15); color:var(--yel); }
-.tag-blue   { background:rgba(8,145,178,.15);  color:var(--cyn); }
-.tag-gray   { background:rgba(71,85,105,.3);   color:var(--txt2); }
-.tag-orange { background:rgba(232,98,46,.15);  color:var(--acc); }
-.tag-purple { background:rgba(139,92,246,.15); color:var(--pur); }
+.tag-green  { background:rgba(5,150,105,.12);  color:var(--grn); }
+.tag-red    { background:rgba(220,38,38,.1);   color:var(--red); }
+.tag-yellow { background:rgba(180,83,9,.1);    color:var(--yel); }
+.tag-blue   { background:rgba(39,110,241,.12); color:var(--cyn); }
+.tag-gray   { background:rgba(112,144,184,.15);color:var(--txt2); }
+.tag-orange { background:rgba(39,110,241,.12); color:var(--acc); }
+.tag-purple { background:rgba(91,91,222,.12);  color:var(--pur); }
 
 /* ═══════════════════════════════════════
    페이지 레이아웃
@@ -51,24 +71,29 @@ body { background:var(--s1); color:var(--txt);
 /* ─── 상단 필터바 ─── */
 .db-filter-bar {
   display:flex; gap:6px; align-items:center; flex-wrap:wrap;
-  padding:8px 14px; background:var(--s2); border-bottom:1px solid var(--bd);
+  padding:10px 16px;
+  background:#ffffff;
+  border-bottom:2px solid var(--bd);
+  box-shadow:0 2px 8px rgba(39,110,241,.08);
   position:sticky; top:0; z-index:100;
 }
-.db-filter-bar label { font-size:10px; color:var(--txt3); }
+.db-filter-bar label { font-size:10px; color:var(--txt3); font-weight:500; }
 .db-filter-bar select {
-  background:var(--s3); border:1px solid var(--bd); border-radius:4px;
-  color:var(--txt); padding:3px 7px; font-size:11px; cursor:pointer; outline:none;
+  background:var(--s3); border:1px solid var(--bd); border-radius:5px;
+  color:var(--txt); padding:4px 8px; font-size:11px; cursor:pointer; outline:none;
 }
+.db-filter-bar select:focus { border-color:var(--acc); }
 .db-filter-bar input[type=text] {
-  background:var(--s3); border:1px solid var(--bd); border-radius:4px;
-  color:var(--txt); padding:3px 9px; font-size:11px; outline:none; width:150px;
+  background:var(--s3); border:1px solid var(--bd); border-radius:5px;
+  color:var(--txt); padding:4px 10px; font-size:11px; outline:none; width:160px;
 }
-.db-filter-bar input[type=text]:focus { border-color:var(--cyn); }
-.fsep { width:1px; height:16px; background:var(--bd); margin:0 2px; }
-.filter-chip { padding:3px 9px; border-radius:10px; border:1px solid var(--bd);
-  background:var(--s3); color:var(--txt3); font-size:10px; cursor:pointer; transition:.15s; }
-.filter-chip.on { border-color:var(--cyn); color:var(--cyn); background:rgba(8,145,178,.12); }
-.db-count-badge { font-size:11px; color:var(--cyn); font-weight:600; margin-left:4px; }
+.db-filter-bar input[type=text]:focus { border-color:var(--acc); box-shadow:0 0 0 2px rgba(39,110,241,.15); }
+.fsep { width:1px; height:18px; background:var(--bd); margin:0 3px; }
+.filter-chip { padding:4px 11px; border-radius:20px; border:1px solid var(--bd);
+  background:var(--s3); color:var(--txt3); font-size:10px; cursor:pointer; transition:.15s; font-weight:500; }
+.filter-chip:hover { border-color:var(--acc); color:var(--acc); }
+.filter-chip.on { border-color:var(--acc); color:#fff; background:var(--acc); }
+.db-count-badge { font-size:12px; color:var(--acc); font-weight:700; margin-left:4px; }
 
 /* ─── 본문 좌우 레이아웃 ─── */
 .db-body { display:flex; flex:1; overflow:hidden; }
@@ -83,19 +108,21 @@ body { background:var(--s1); color:var(--txt);
 /* 업체 목록 테이블 */
 #db-table { width:100%; border-collapse:collapse; }
 #db-table th {
-  padding:7px 8px; font-size:10px; font-weight:600; color:var(--txt3);
-  text-align:left; border-bottom:1px solid var(--bd);
-  position:sticky; top:0; background:var(--s2); z-index:10; cursor:pointer;
-  white-space:nowrap; user-select:none;
+  padding:9px 8px; font-size:10px; font-weight:700; color:var(--acc);
+  text-align:left; border-bottom:2px solid var(--acc);
+  position:sticky; top:0;
+  background:#f5f8ff;
+  z-index:10; cursor:pointer; white-space:nowrap; user-select:none;
+  letter-spacing:.04em; text-transform:uppercase;
 }
-#db-table th:hover { color:var(--cyn); }
+#db-table th:hover { color:var(--navy); background:#eef2ff; }
 #db-table th .sort-icon { font-size:9px; margin-left:3px; }
 #db-table td {
-  padding:8px 8px; font-size:12px; border-bottom:1px solid rgba(51,65,85,.4);
+  padding:9px 8px; font-size:12px; border-bottom:1px solid #e8eef8;
   vertical-align:middle;
 }
-#db-table tr:hover td { background:rgba(8,145,178,.05); }
-#db-table tr.selected td { background:rgba(8,145,178,.1); }
+#db-table tr:hover td { background:#f0f6ff; }
+#db-table tr.selected td { background:#deeaff; border-bottom-color:rgba(39,110,241,.25); }
 #db-table tr { cursor:pointer; }
 .db-name-cell { font-weight:600; max-width:130px; }
 .db-addr-cell { font-size:10px; color:var(--txt3); max-width:150px;
@@ -107,27 +134,35 @@ body { background:var(--s1); color:var(--txt);
 .score-bar-wrap { width:60px; }
 .score-bar-track { background:var(--s3); border-radius:2px; height:4px; }
 .score-bar-fill  { height:100%; border-radius:2px; }
-.cmp-chk { width:16px; height:16px; cursor:pointer; accent-color:var(--cyn); }
+.cmp-chk { width:16px; height:16px; cursor:pointer; accent-color:var(--acc); }
 .cmp-count-pill {
   display:inline-flex; align-items:center; gap:4px;
   padding:3px 9px; border-radius:10px;
-  background:rgba(8,145,178,.15); border:1px solid var(--cyn);
-  font-size:11px; color:var(--cyn);
+  background:rgba(39,110,241,.15); border:1px solid var(--acc);
+  font-size:11px; color:var(--acc);
 }
 
 /* ─── 상세 패널 ─── */
 #det-panel {
-  width:420px; min-width:420px; border-left:1px solid var(--bd);
+  width:420px; min-width:420px; border-left:2px solid var(--bd);
   background:var(--s2); display:flex; flex-direction:column;
   overflow:hidden;
   transition:width .25s ease, min-width .25s ease;
+  box-shadow:-4px 0 16px rgba(39,110,241,.06);
 }
 #det-panel.closed { width:0; min-width:0; border-left:none; overflow:hidden; }
 
 .det-header {
-  padding:12px 14px 0; background:var(--s3); border-bottom:1px solid var(--bd);
+  padding:14px 16px 0;
+  background:linear-gradient(135deg, #276EF1 0%, #1a60e0 100%);
+  border-bottom:1px solid rgba(39,110,241,.3);
   flex-shrink:0;
 }
+/* 헤더 내 텍스트 흰색으로 */
+.det-header #dp-name { color:#fff; }
+.det-header #dp-status .tag { opacity:.9; }
+.det-close { color:rgba(255,255,255,.7) !important; }
+.det-close:hover { color:#fff !important; }
 .det-header-top {
   display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px;
 }
@@ -139,11 +174,11 @@ body { background:var(--s1); color:var(--txt);
 /* 상세 탭 */
 .det-tabs { display:flex; gap:0; margin-top:8px; }
 .det-tab {
-  padding:7px 14px; font-size:11px; cursor:pointer; color:var(--txt3);
-  border-bottom:2px solid transparent; transition:.15s; white-space:nowrap;
+  padding:8px 14px; font-size:11px; cursor:pointer; color:rgba(255,255,255,.6);
+  border-bottom:3px solid transparent; transition:.15s; white-space:nowrap;
 }
-.det-tab.active { color:var(--cyn); border-bottom-color:var(--cyn); font-weight:600; }
-.det-tab:hover  { color:var(--txt2); }
+.det-tab.active { color:#fff; border-bottom-color:#fff; font-weight:700; }
+.det-tab:hover  { color:rgba(255,255,255,.9); }
 
 /* 상세 본문 */
 #dp-content { flex:1; overflow-y:auto; }
@@ -153,25 +188,26 @@ body { background:var(--s1); color:var(--txt);
 /* 섹션 내 스타일 */
 .det-section { margin-bottom:16px; }
 .det-section-title {
-  font-size:10px; color:var(--txt3); font-weight:600;
-  text-transform:uppercase; letter-spacing:.05em;
-  margin-bottom:7px; padding-bottom:4px; border-bottom:1px solid var(--bd);
+  font-size:10px; color:var(--acc); font-weight:700;
+  text-transform:uppercase; letter-spacing:.06em;
+  margin-bottom:7px; padding-bottom:5px;
+  border-bottom:2px solid var(--bd);
 }
 .kv-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
-.kv-item { background:var(--s3); border-radius:4px; padding:7px 9px; }
+.kv-item { background:var(--s3); border-radius:6px; padding:8px 10px; border:1px solid var(--bd); }
 .kv-item.full { grid-column:1/-1; }
-.kv-label { font-size:9px; color:var(--txt3); margin-bottom:2px; }
-.kv-val   { font-size:12px; font-weight:600; }
-.kv-val.sm { font-size:11px; font-weight:400; }
+.kv-label { font-size:9px; color:var(--txt3); margin-bottom:3px; font-weight:600; letter-spacing:.03em; text-transform:uppercase; }
+.kv-val   { font-size:12px; font-weight:700; color:var(--txt); }
+.kv-val.sm { font-size:11px; font-weight:500; }
 
 /* 재무 차트 */
 .fin-chart { display:flex; align-items:flex-end; gap:5px; height:60px; margin-top:4px; }
 .fin-bar-col { flex:1; display:flex; flex-direction:column; align-items:center; gap:2px; }
 .fin-bar-num { font-size:9px; color:var(--txt2); }
-.fin-bar     { width:100%; border-radius:2px 2px 0 0; background:var(--cyn); transition:height .5s; }
+.fin-bar     { width:100%; border-radius:3px 3px 0 0; background:var(--acc); transition:height .5s; }
 .fin-bar-yr  { font-size:8px; color:var(--txt3); }
 .fin-kpi-row { display:flex; gap:6px; margin-top:8px; }
-.fin-kpi { flex:1; background:var(--s3); border-radius:4px; padding:6px 8px; text-align:center; }
+.fin-kpi { flex:1; background:var(--s3); border-radius:6px; padding:8px 8px; text-align:center; border:1px solid var(--bd); }
 .fin-kpi-val  { font-size:14px; font-weight:700; }
 .fin-kpi-lbl  { font-size:9px; color:var(--txt3); }
 
@@ -182,7 +218,7 @@ body { background:var(--s1); color:var(--txt);
   border:1px solid var(--bd); background:var(--s3);
   color:var(--txt2); font-size:11px; cursor:pointer; width:100%; transition:.15s;
 }
-.dart-btn:hover { border-color:var(--acc); color:var(--acc); }
+.dart-btn:hover { border-color:var(--cyn); color:var(--cyn); }
 .dart-status { font-size:10px; margin-top:6px; color:var(--txt3); min-height:16px; }
 
 /* 견적이력 탭 */
@@ -198,8 +234,9 @@ body { background:var(--s1); color:var(--txt);
 }
 .quote-form label { font-size:10px; color:var(--txt3); display:block; margin-bottom:3px; }
 .quote-item {
-  padding:9px 10px; background:var(--s3); border-radius:var(--r);
+  padding:10px 12px; background:var(--s2); border-radius:var(--r);
   border:1px solid var(--bd); margin-bottom:6px;
+  box-shadow:0 1px 3px rgba(39,110,241,.06);
 }
 .quote-item-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; }
 .quote-item-prod { font-size:12px; font-weight:600; }
@@ -210,7 +247,7 @@ body { background:var(--s1); color:var(--txt);
 /* 장비 목록 */
 .equip-row {
   display:flex; justify-content:space-between; align-items:center;
-  padding:5px 0; border-bottom:1px solid rgba(51,65,85,.3); font-size:11px;
+  padding:5px 0; border-bottom:1px solid rgba(197,213,240,.3); font-size:11px;
 }
 .equip-row:last-child { border-bottom:none; }
 .equip-capa { color:var(--cyn); font-weight:600; }
@@ -226,7 +263,7 @@ body { background:var(--s1); color:var(--txt);
 .shadow-chip.on { border-color:var(--grn); color:var(--grn); background:rgba(16,185,129,.1); }
 .shadow-detail-row {
   display:flex; justify-content:space-between;
-  padding:5px 0; border-bottom:1px solid rgba(51,65,85,.3); font-size:11px;
+  padding:5px 0; border-bottom:1px solid rgba(197,213,240,.3); font-size:11px;
 }
 .shadow-detail-row:last-child { border-bottom:none; }
 
@@ -254,10 +291,14 @@ body { background:var(--s1); color:var(--txt);
 }
 #cmp-modal.open { display:flex; }
 .cmp-wrap {
-  background:var(--s2); border:1px solid var(--bd); border-radius:8px;
+  background:var(--s2); border:1px solid var(--bd); border-radius:10px;
   width:92vw; max-width:1100px; max-height:88vh;
   display:flex; flex-direction:column; overflow:hidden;
+  box-shadow:0 20px 60px rgba(39,110,241,.2);
 }
+.cmp-modal-header { background:#f5f8ff; }
+.cmp-type-tabs { background:#fff; }
+#cmp-bar { background:#f5f8ff; }
 .cmp-modal-header {
   padding:12px 16px; border-bottom:1px solid var(--bd);
   display:flex; justify-content:space-between; align-items:center; flex-shrink:0;
@@ -273,7 +314,7 @@ body { background:var(--s1); color:var(--txt);
   padding:8px 16px; font-size:11px; cursor:pointer;
   color:var(--txt3); border-bottom:2px solid transparent; transition:.15s;
 }
-.cmp-type-tab.active { color:var(--cyn); border-bottom-color:var(--cyn); font-weight:600; }
+.cmp-type-tab.active { color:var(--acc); border-bottom-color:var(--acc); font-weight:700; }
 
 /* 비교 선택 바 */
 #cmp-bar {
@@ -283,8 +324,8 @@ body { background:var(--s1); color:var(--txt);
 .cmp-sel-item {
   display:inline-flex; align-items:center; gap:4px;
   padding:3px 8px; border-radius:10px;
-  background:rgba(8,145,178,.15); border:1px solid var(--cyn);
-  font-size:10px; color:var(--cyn);
+  background:rgba(39,110,241,.15); border:1px solid var(--acc);
+  font-size:10px; color:var(--acc);
 }
 .cmp-sel-item .rm { cursor:pointer; color:var(--txt3); }
 .cmp-sel-item .rm:hover { color:var(--red); }
@@ -293,37 +334,39 @@ body { background:var(--s1); color:var(--txt);
 #cmp-body { flex:1; overflow:auto; padding:14px 16px; }
 .cmp-table { width:100%; border-collapse:collapse; table-layout:fixed; }
 .cmp-table th {
-  padding:8px; background:var(--s3); font-size:11px;
+  padding:8px; background:#f5f8ff; font-size:11px; color:var(--acc);
   border:1px solid var(--bd); text-align:center;
-  position:sticky; top:0; z-index:5;
+  position:sticky; top:0; z-index:5; font-weight:700;
 }
 .cmp-table th.row-head {
   width:100px; text-align:left; font-size:10px; color:var(--txt3);
   background:var(--s2);
 }
 .cmp-table td {
-  padding:7px 8px; border:1px solid rgba(51,65,85,.4);
+  padding:7px 8px; border:1px solid rgba(197,213,240,.4);
   font-size:11px; text-align:center; vertical-align:middle;
 }
 .cmp-table td.row-head {
   text-align:left; font-size:10px; color:var(--txt3);
   background:var(--s2); font-weight:600; padding-left:10px;
 }
-.cmp-table tr:hover td:not(.row-head) { background:rgba(8,145,178,.04); }
+.cmp-table tr:hover td:not(.row-head) { background:rgba(39,110,241,.04); }
 .cmp-best { color:var(--grn); font-weight:700; }
 .cmp-worst { color:var(--red); }
 
 /* ─── 토스트 ─── */
 #toast-wrap { position:fixed; bottom:20px; right:20px; z-index:9999;
   display:flex; flex-direction:column; gap:6px; }
-.toast { padding:9px 15px; background:var(--s2); border:1px solid var(--cyn);
+.toast { padding:10px 16px; background:#fff; border:1px solid var(--bd);
+  border-left:4px solid var(--acc);
   border-radius:var(--r); color:var(--txt); font-size:12px;
+  box-shadow:0 4px 20px rgba(39,110,241,.18);
   animation:toastIn .2s ease; }
 @keyframes toastIn { from{opacity:0;transform:translateX(20px)} to{opacity:1;transform:translateX(0)} }
 
 /* 스피너 */
 .spinner { display:inline-block; width:12px; height:12px;
-  border:2px solid var(--bd); border-top-color:var(--cyn);
+  border:2px solid var(--bd); border-top-color:var(--acc);
   border-radius:50%; animation:spin .7s linear infinite; vertical-align:middle; }
 @keyframes spin { to{transform:rotate(360deg)} }
 
@@ -342,12 +385,12 @@ body.adm-mode .adm-view-only  { display:none; }
 body.adm-mode .adm-badge { display:block; }
 
 .edit-input {
-  background:var(--s2); border:1px solid var(--acc);
+  background:var(--s1); border:1px solid var(--acc);
   border-radius:4px; color:var(--txt);
   padding:4px 7px; font-size:11px; width:100%;
   outline:none; font-family:inherit;
 }
-.edit-input:focus { border-color:var(--yel); }
+.edit-input:focus { border-color:var(--cyn); box-shadow:0 0 0 2px rgba(39,110,241,.15); }
 
 /* kv-item 수정 버튼 */
 .kv-edit-btn {
@@ -367,29 +410,34 @@ body.adm-mode .kv-edit-btn { display:inline; }
 #mfds-modal.open { display:flex; }
 .mfds-wrap {
   background:var(--s2); border:1px solid var(--bd);
-  border-radius:8px; width:620px; max-height:88vh;
+  border-radius:10px; width:620px; max-height:88vh;
   display:flex; flex-direction:column; overflow:hidden;
+  box-shadow:0 20px 60px rgba(39,110,241,.2);
 }
 .mfds-header {
-  padding:14px 16px; border-bottom:1px solid var(--bd);
+  padding:14px 18px; border-bottom:1px solid var(--bd);
+  background:linear-gradient(135deg, #276EF1 0%, #1a60e0 100%);
   display:flex; justify-content:space-between; align-items:flex-start; flex-shrink:0;
 }
+.mfds-title { color:#fff !important; }
+.mfds-close { color:rgba(255,255,255,.7) !important; }
+.mfds-close:hover { color:#fff !important; }
 .mfds-title { font-size:15px; font-weight:700; }
 .mfds-close { background:none; border:none; color:var(--txt3); font-size:20px; cursor:pointer; }
 .mfds-close:hover { color:var(--txt); }
 .mfds-steps {
   display:flex; align-items:center; padding:12px 20px;
-  background:var(--s3); border-bottom:1px solid var(--bd); flex-shrink:0;
+  background:#f5f8ff; border-bottom:1px solid var(--bd); flex-shrink:0;
 }
 .mfds-step {
   display:flex; flex-direction:column; align-items:center; gap:3px;
-  font-size:16px; font-weight:700; color:var(--txt3); min-width:32px; text-align:center;
+  font-size:16px; font-weight:700; color:var(--bd); min-width:32px; text-align:center;
 }
 .mfds-step span { font-size:9px; font-weight:400; }
-.mfds-step.active { color:var(--cyn); }
+.mfds-step.active { color:var(--acc); }
 .mfds-step.done   { color:var(--grn); }
-.mfds-step-line   { flex:1; height:1px; background:var(--bd); margin:0 4px; }
-.mfds-step-line.done { background:var(--grn); }
+.mfds-step-line   { flex:1; height:2px; background:var(--bd); margin:0 4px; border-radius:1px; }
+.mfds-step-line.done { background:linear-gradient(90deg, var(--acc), var(--grn)); }
 .mfds-body { flex:1; overflow-y:auto; }
 .mfds-pane { padding:16px; }
 .mfds-section-title {
@@ -400,10 +448,11 @@ body.adm-mode .kv-edit-btn { display:inline; }
 }
 .mfds-result-card {
   border:1px solid var(--bd); border-radius:var(--r); padding:10px 12px;
-  margin-bottom:8px; cursor:pointer; transition:.15s; background:var(--s3);
+  margin-bottom:8px; cursor:pointer; transition:.15s; background:var(--s2);
+  box-shadow:0 1px 3px rgba(39,110,241,.06);
 }
-.mfds-result-card:hover    { border-color:var(--cyn); }
-.mfds-result-card.selected { border-color:var(--cyn); background:rgba(8,145,178,.08); }
+.mfds-result-card:hover    { border-color:var(--acc); box-shadow:0 0 0 1px rgba(39,110,241,.2); }
+.mfds-result-card.selected { border-color:var(--acc); background:rgba(39,110,241,.08); }
 .mfds-rc-name  { font-size:13px; font-weight:700; margin-bottom:4px; }
 .mfds-rc-grid  { display:grid; grid-template-columns:repeat(2,1fr); gap:4px; }
 .mfds-rc-kv    { font-size:10px; }
@@ -414,16 +463,17 @@ body.adm-mode .kv-edit-btn { display:inline; }
   padding:6px 8px; background:var(--s3); font-size:10px; font-weight:600;
   color:var(--txt3); text-align:left; border-bottom:1px solid var(--bd);
 }
-.mfds-cmp-table td { padding:7px 8px; border-bottom:1px solid rgba(51,65,85,.3); vertical-align:top; }
+.mfds-cmp-table td { padding:7px 8px; border-bottom:1px solid rgba(197,213,240,.3); vertical-align:top; }
 .mfds-cmp-table tr:last-child td { border-bottom:none; }
 .mfds-diff-new   { color:var(--cyn); font-weight:600; }
 .mfds-diff-old   { color:var(--txt3); text-decoration:line-through; font-size:10px; display:block; margin-top:2px; }
 .mfds-same       { color:var(--txt3); }
-.mfds-change-badge { display:inline-block; font-size:9px; padding:1px 5px; border-radius:10px; background:rgba(8,145,178,.15); color:var(--cyn); margin-left:5px; }
+.mfds-change-badge { display:inline-block; font-size:9px; padding:1px 5px; border-radius:10px; background:rgba(39,110,241,.15); color:var(--cyn); margin-left:5px; }
 .mfds-crawl-log {
-  background:var(--s3); border-radius:var(--r); padding:10px 12px;
-  font-family:var(--mono); font-size:10px; color:var(--txt2); line-height:1.8;
+  background:#0b1e4a; border-radius:var(--r); padding:10px 12px;
+  font-family:var(--mono); font-size:10px; color:#8aafd4; line-height:1.8;
   max-height:160px; overflow-y:auto;
+  border:1px solid #1c2f50;
 }
 .mfds-log-ok   { color:var(--grn); }
 .mfds-log-warn { color:var(--yel); }
@@ -477,15 +527,15 @@ body.adm-mode .kv-edit-btn { display:inline; }
 .quote-actions { display:flex; gap:4px; margin-left:auto; }
 .quote-tag-extract {
   display:flex; flex-wrap:wrap; gap:4px; margin-top:6px;
-  padding:6px 8px; background:rgba(8,145,178,.06);
-  border:1px solid rgba(8,145,178,.2); border-radius:var(--r);
+  padding:6px 8px; background:rgba(39,110,241,.06);
+  border:1px solid rgba(39,110,241,.2); border-radius:var(--r);
 }
 .keyword-suggest {
   display:inline-flex; align-items:center; gap:4px;
   padding:2px 7px; border-radius:10px; font-size:10px;
-  background:rgba(8,145,178,.12); color:var(--cyn); cursor:pointer; border:none;
+  background:rgba(39,110,241,.12); color:var(--cyn); cursor:pointer; border:none;
 }
-.keyword-suggest:hover { background:rgba(8,145,178,.25); }
+.keyword-suggest:hover { background:rgba(39,110,241,.25); }
 
 /* ─── Shadow 출처링크 ─── */
 .shadow-src-link { color:var(--cyn); text-decoration:none; font-size:9px; }
@@ -493,7 +543,7 @@ body.adm-mode .kv-edit-btn { display:inline; }
 .shadow-keyword-row { display:flex; flex-wrap:wrap; gap:4px; margin-top:8px; padding:6px 8px; background:rgba(139,92,246,.06); border:1px solid rgba(139,92,246,.2); border-radius:var(--r); }
 
 /* ─── 스피너 ─── */
-.spinner { display:inline-block; width:14px; height:14px; border:2px solid var(--bd); border-top-color:var(--cyn); border-radius:50%; animation:spin .7s linear infinite; vertical-align:middle; }
+.spinner { display:inline-block; width:14px; height:14px; border:2px solid var(--bd); border-top-color:var(--acc); border-radius:50%; animation:spin .7s linear infinite; vertical-align:middle; }
 @keyframes spin { to { transform:rotate(360deg); } }
 
 /* ─── Shadow 개별 승인 카드 ─── */
@@ -502,7 +552,7 @@ body.adm-mode .kv-edit-btn { display:inline; }
   padding: 8px 10px; margin-bottom: 6px;
   background: var(--s3); transition: .2s;
 }
-.shadow-approval-card:hover { border-color: rgba(8,145,178,.4); }
+.shadow-approval-card:hover { border-color: rgba(39,110,241,.4); }
 
 /* ─── 관리자 로그인 모달 ─── */
 #adm-login-modal {
@@ -511,8 +561,10 @@ body.adm-mode .kv-edit-btn { display:inline; }
 }
 #adm-login-modal.open { display:flex; }
 .adm-login-box {
-  background:var(--s2); border:1px solid var(--acc);
-  border-radius:8px; padding:24px; width:300px;
+  background:var(--s2); border:1px solid var(--bd);
+  border-top:4px solid var(--acc);
+  border-radius:10px; padding:24px; width:300px;
+  box-shadow:0 12px 40px rgba(39,110,241,.2);
 }
 .adm-login-title { font-size:14px; font-weight:700; margin-bottom:14px; }
 .adm-login-input {
@@ -532,7 +584,7 @@ body.adm-mode .kv-edit-btn { display:inline; }
 .fin-upload-preview.show { display:block; }
 .fin-preview-row {
   display:flex; justify-content:space-between;
-  padding:3px 0; border-bottom:1px solid rgba(51,65,85,.3);
+  padding:3px 0; border-bottom:1px solid rgba(197,213,240,.3);
 }
 .fin-preview-row:last-child { border-bottom:none; }
 .fin-field-match  { color:var(--grn); }
@@ -548,7 +600,7 @@ body.adm-mode .kv-edit-btn { display:inline; }
   border:1px dashed var(--cyn); color:var(--cyn);
   background:transparent; cursor:pointer; margin-top:4px;
 }
-.hp-search-btn:hover { background:rgba(8,145,178,.1); }
+.hp-search-btn:hover { background:rgba(39,110,241,.1); }
 .hp-verify-btn {
   font-size:10px; padding:2px 7px; border-radius:10px;
   border:1px solid var(--grn); color:var(--grn);
@@ -556,9 +608,9 @@ body.adm-mode .kv-edit-btn { display:inline; }
 }
 
 ::-webkit-scrollbar { width:5px; height:5px; }
-::-webkit-scrollbar-track { background:var(--s1); }
-::-webkit-scrollbar-thumb { background:var(--bd); border-radius:3px; }
-::-webkit-scrollbar-thumb:hover { background:var(--txt3); }
+::-webkit-scrollbar-track { background:#f0f4ff; }
+::-webkit-scrollbar-thumb { background:rgba(39,110,241,.25); border-radius:3px; }
+::-webkit-scrollbar-thumb:hover { background:var(--acc); }
 
 /* ─── SVG 꺾은선 차트 ─── */
 .line-chart-wrap { width:100%; overflow:hidden; }
@@ -586,7 +638,7 @@ body.adm-mode .kv-edit-btn { display:inline; }
   border:1px solid var(--bd); background:var(--s3);
   cursor:pointer; transition:.15s; text-align:center;
 }
-.acq-btn:hover { border-color:var(--cyn); background:rgba(8,145,178,.08); }
+.acq-btn:hover { border-color:var(--cyn); background:rgba(39,110,241,.08); }
 .acq-btn .acq-icon { font-size:18px; }
 .acq-btn .acq-label { font-size:10px; font-weight:600; color:var(--txt2); }
 .acq-btn .acq-sub   { font-size:9px; color:var(--txt3); }
@@ -611,18 +663,18 @@ body.adm-mode .kv-edit-btn { display:inline; }
 }
 .shadow-new-badge {
   display:inline-block; font-size:9px; padding:1px 5px;
-  border-radius:3px; background:rgba(232,98,46,.15);
+  border-radius:3px; background:rgba(39,110,241,.15);
   color:var(--acc); margin-left:5px;
 }
 .shadow-confirm-box {
   display:none; margin-top:8px;
-  background:rgba(8,145,178,.08); border:1px solid var(--cyn);
+  background:rgba(39,110,241,.08); border:1px solid var(--cyn);
   border-radius:var(--r); padding:10px;
 }
 .shadow-confirm-box.show { display:block; }
 .shadow-confirm-item {
   display:flex; justify-content:space-between; align-items:center;
-  padding:5px 0; border-bottom:1px solid rgba(51,65,85,.3); font-size:11px;
+  padding:5px 0; border-bottom:1px solid rgba(197,213,240,.3); font-size:11px;
 }
 .shadow-confirm-item:last-child { border-bottom:none; }
 
@@ -634,11 +686,11 @@ body.adm-mode .kv-edit-btn { display:inline; }
   border-bottom:1px solid var(--bd);
 }
 .equip-table td {
-  padding:6px 8px; border-bottom:1px solid rgba(51,65,85,.3);
+  padding:6px 8px; border-bottom:1px solid rgba(197,213,240,.3);
   vertical-align:middle;
 }
 .equip-table tr:last-child td { border-bottom:none; }
-.equip-table tr:hover td { background:rgba(8,145,178,.04); }
+.equip-table tr:hover td { background:rgba(39,110,241,.04); }
 .equip-daily-capa { color:var(--cyn); font-weight:600; }
 
 /* ─── 자체 분석 섹션 ─── */
@@ -666,7 +718,7 @@ body.adm-mode .kv-edit-btn { display:inline; }
   border:1px solid var(--bd); background:var(--s2);
   color:var(--txt3); cursor:pointer; transition:.15s;
 }
-.qff-btn.active { border-color:var(--acc); color:var(--acc); background:rgba(232,98,46,.1); }
+.qff-btn.active { border-color:var(--acc); color:var(--acc); background:rgba(39,110,241,.1); }
 </style>
 </head>
 
@@ -946,8 +998,8 @@ body.adm-mode .kv-edit-btn { display:inline; }
         <div style="margin-top:5px;display:flex;gap:4px;flex-wrap:wrap">
           <span style="font-size:9px;padding:1px 5px;border-radius:3px;background:rgba(139,92,246,.1);color:var(--pur)">B-1 URL폴백</span>
           <span style="font-size:9px;padding:1px 5px;border-radius:3px;background:rgba(245,158,11,.1);color:var(--yel)">B-2 SPA</span>
-          <span style="font-size:9px;padding:1px 5px;border-radius:3px;background:rgba(8,145,178,.1);color:var(--cyn)">B-3 EUC-KR</span>
-          <span style="font-size:9px;padding:1px 5px;border-radius:3px;background:rgba(232,98,46,.1);color:var(--acc)">B-4 정규화</span>
+          <span style="font-size:9px;padding:1px 5px;border-radius:3px;background:rgba(39,110,241,.1);color:var(--cyn)">B-3 EUC-KR</span>
+          <span style="font-size:9px;padding:1px 5px;border-radius:3px;background:rgba(39,110,241,.1);color:var(--acc)">B-4 정규화</span>
           <span style="font-size:9px;padding:1px 5px;border-radius:3px;background:rgba(16,185,129,.1);color:var(--grn)">B-5 복수주소</span>
           <span style="font-size:9px;padding:1px 5px;border-radius:3px;background:rgba(239,68,68,.1);color:var(--red)">B-6 필터</span>
         </div>
@@ -1005,8 +1057,8 @@ body.adm-mode .kv-edit-btn { display:inline; }
         </div>
 
         <!-- DART API 키 (재무조회용) -->
-        <div style="margin-bottom:14px;padding:10px 12px;background:rgba(8,145,178,.06);
-          border:1px solid rgba(8,145,178,.3);border-radius:var(--r)">
+        <div style="margin-bottom:14px;padding:10px 12px;background:rgba(39,110,241,.06);
+          border:1px solid rgba(39,110,241,.3);border-radius:var(--r)">
           <div style="font-size:11px;font-weight:600;color:var(--cyn);margin-bottom:6px">
             📊 DART API 키 (재무제표 자동 조회)
           </div>
@@ -1061,7 +1113,7 @@ body.adm-mode .kv-edit-btn { display:inline; }
           <div id="naver-test-result" style="display:none;margin-top:8px;padding:6px 9px;
             background:var(--s3);border-radius:4px;font-size:10px"></div>
         </div>
-        <div style="background:rgba(8,145,178,.06);border:1px solid rgba(8,145,178,.3);
+        <div style="background:rgba(39,110,241,.06);border:1px solid rgba(39,110,241,.3);
           border-radius:var(--r);padding:10px 12px;margin-bottom:14px;font-size:11px;line-height:1.8">
           <div style="font-weight:600;color:var(--cyn);margin-bottom:6px">📋 API 키 발급 안내</div>
           <div style="color:var(--txt2)">
@@ -1648,7 +1700,7 @@ function formatNum(n) {
 ══════════════════════════════════════════════════════════ */
 const FORM_TAXONOMY = {
   '마스크 계열': {
-    color:'#0891b2', icon:'💧',
+    color:'#3b82f6', icon:'💧',
     forms:['시트마스크','하이드로겔팩','겔마스크','바이오셀룰로오스 마스크','다회패드',
            '워시오프팩','필오프팩','슬리핑마스크','코인마스크','파우치마스크','침척마스크'],
     synonyms:{
@@ -1674,7 +1726,7 @@ const FORM_TAXONOMY = {
     },
   },
   '색조': {
-    color:'#e8622e', icon:'💄',
+    color:'#276EF1', icon:'💄',
     forms:['파운데이션','쿠션','BB크림','CC크림','프라이머','립스틱','틴트','아이섀도'],
     synonyms:{
       '쿠션':['에어쿠션','쿠션팩트'],
@@ -1947,8 +1999,8 @@ function renderDb(filterOverride) {
     const plt       = (d.plt||[]).join(', ') || '—';
     const inCmp     = _cmpList.includes(d.code);
     const statusBg  = d.status==='CONFIRMED' ? 'rgba(16,185,129,.1)'
-                    : d.status==='SHADOW'    ? 'rgba(8,145,178,.08)'
-                    : 'rgba(232,98,46,.1)';
+                    : d.status==='SHADOW'    ? 'rgba(39,110,241,.08)'
+                    : 'rgba(39,110,241,.1)';
     return `
     <tr onclick="openDet('${d.code}')" id="row-${d.code}"
       class="${_curCode===d.code?'selected':''}">
@@ -2149,7 +2201,7 @@ function renderDetContent(d) {
       const details = (sh.details || []).slice(0, 3);
       if (!kwTags.length && !details.length && !sh.뉴스 && !sh.채용 && !sh.특허) return '';
       const statTags = [
-        sh.뉴스  > 0 ? `<span style="font-size:9px;padding:1px 6px;border-radius:10px;background:rgba(8,145,178,.1);color:var(--cyn)">📰 뉴스 ${sh.뉴스}건</span>` : '',
+        sh.뉴스  > 0 ? `<span style="font-size:9px;padding:1px 6px;border-radius:10px;background:rgba(39,110,241,.1);color:var(--cyn)">📰 뉴스 ${sh.뉴스}건</span>` : '',
         sh.채용  > 0 ? `<span style="font-size:9px;padding:1px 6px;border-radius:10px;background:rgba(16,185,129,.1);color:var(--grn)">💼 채용 ${sh.채용}건</span>` : '',
         sh.특허  > 0 ? `<span style="font-size:9px;padding:1px 6px;border-radius:10px;background:rgba(139,92,246,.1);color:var(--pur)">🔬 특허 ${sh.특허}건</span>` : '',
       ].filter(Boolean).join('');
@@ -2198,7 +2250,7 @@ function renderDetContent(d) {
             <div style="flex:1">
               ${[
                 {label:'생산', key:'score_prod', color:'#10b981', weight:30},
-                {label:'품질', key:'score_qual', color:'#0891b2', weight:30},
+                {label:'품질', key:'score_qual', color:'#3b82f6', weight:30},
                 {label:'재무', key:'score_fin',  color:'#f59e0b', weight:20},
                 {label:'Shadow',key:'score_shad',color:'#8b5cf6',weight:20},
               ].map(sc => {
@@ -2252,7 +2304,7 @@ function renderDetContent(d) {
 
             if (insights.length === 0) return '';
             const maxGain = insights.length * 8;
-            return `<div style="margin-top:8px;padding:7px 9px;background:rgba(8,145,178,.06);
+            return `<div style="margin-top:8px;padding:7px 9px;background:rgba(39,110,241,.06);
               border-left:2px solid var(--cyn);border-radius:var(--r)">
               <div style="font-size:9px;font-weight:600;color:var(--cyn);margin-bottom:4px">
                 💡 개선 시 예상 점수 +${maxGain}점 가능
@@ -2441,7 +2493,7 @@ function renderQuoteTab(code) {
   const quotes = QUOTE_DATA.filter(q => q.code === code);
   const resultColors = {
     '완료':   {bg:'rgba(16,185,129,.15)', color:'var(--grn)'},
-    '진행중': {bg:'rgba(8,145,178,.15)',  color:'var(--cyn)'},
+    '진행중': {bg:'rgba(39,110,241,.15)',  color:'var(--cyn)'},
     '검토중': {bg:'rgba(245,158,11,.15)', color:'var(--yel)'},
     'DROP':   {bg:'rgba(239,68,68,.15)',  color:'var(--red)'}
   };
@@ -2451,14 +2503,14 @@ function renderQuoteTab(code) {
   const allCats   = Object.keys(formsObj);
   const allForms  = [...new Set(Object.values(formsObj).flat())];
   const capabilityHtml = (allCats.length > 0 || allForms.length > 0) ? `
-    <div class="det-section" style="background:rgba(8,145,178,.04);border:1px solid rgba(8,145,178,.2);border-radius:var(--r);padding:8px 10px;margin-bottom:10px">
+    <div class="det-section" style="background:rgba(39,110,241,.04);border:1px solid rgba(39,110,241,.2);border-radius:var(--r);padding:8px 10px;margin-bottom:10px">
       <div style="font-size:10px;font-weight:600;color:var(--cyn);margin-bottom:5px">
         🏭 ${d?.name||''} 생산 가능 역량
       </div>
       ${allCats.length ? `
       <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:4px;align-items:center">
         <span style="font-size:9px;color:var(--txt3);flex-shrink:0">제품유형:</span>
-        ${allCats.map(cat=>`<span style="font-size:9px;padding:1px 7px;border-radius:10px;background:rgba(8,145,178,.12);color:var(--cyn)">${cat}</span>`).join('')}
+        ${allCats.map(cat=>`<span style="font-size:9px;padding:1px 7px;border-radius:10px;background:rgba(39,110,241,.12);color:var(--cyn)">${cat}</span>`).join('')}
       </div>` : ''}
       ${allForms.length ? `
       <div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center">
@@ -2513,13 +2565,13 @@ function renderQuoteTab(code) {
           <div style="margin-top:5px;display:flex;justify-content:space-between;align-items:center;">
             <span style="font-size:10px;color:var(--txt3);">${q.note}</span>
             <div style="display:flex;align-items:center;gap:5px">
-              ${q.keywords?.length ? q.keywords.map(kw=>`<span style="font-size:9px;padding:1px 5px;border-radius:10px;background:rgba(8,145,178,.15);color:var(--cyn)">${kw}</span>`).join('') : ''}
+              ${q.keywords?.length ? q.keywords.map(kw=>`<span style="font-size:9px;padding:1px 5px;border-radius:10px;background:rgba(39,110,241,.15);color:var(--cyn)">${kw}</span>`).join('') : ''}
               <span class="quote-result-tag"
                 style="background:${rc.bg};color:${rc.color}">${q.result}</span>
             </div>
           </div>
           ${q.attachments && q.attachments.length > 0 ? `
-          <div style="margin-top:5px;padding-top:5px;border-top:1px dashed rgba(51,65,85,.3)">
+          <div style="margin-top:5px;padding-top:5px;border-top:1px dashed rgba(197,213,240,.3)">
             <div style="font-size:9px;color:var(--txt3);margin-bottom:3px">📎 첨부파일</div>
             <div style="display:flex;flex-wrap:wrap;gap:3px">
               ${q.attachments.map((att,ai) => `
@@ -2862,7 +2914,7 @@ function onFormKeywordInput(val) {
   if (!matches.length) { acEl.style.display='none'; return; }
   acEl.innerHTML = [...new Map(matches.map(m=>[m.form,m])).values()].slice(0,8).map(item => `
     <div onclick="applyFormSel('${item.form}','${item.cat}','${item.color}')"
-      style="padding:6px 10px;cursor:pointer;display:flex;align-items:center;gap:6px;border-bottom:1px solid rgba(51,65,85,.4)"
+      style="padding:6px 10px;cursor:pointer;display:flex;align-items:center;gap:6px;border-bottom:1px solid rgba(197,213,240,.4)"
       onmouseover="this.style.background='var(--s3)'" onmouseout="this.style.background=''">
       <span style="font-size:8px;padding:1px 4px;border-radius:3px;background:${item.color}22;color:${item.color};white-space:nowrap">${item.icon} ${item.cat}</span>
       <span>${item.form}${item.std&&item.std!==item.form?' <span style=\"color:var(--txt3);font-size:9px\">= '+item.std+'</span>':''}</span>
@@ -2876,7 +2928,7 @@ function renderFormAcList(cat) {
   const v = FORM_TAXONOMY[cat];
   acEl.innerHTML = v.forms.map(f => `
     <div onclick="applyFormSel('${f}','${cat}','${v.color}')"
-      style="padding:6px 10px;cursor:pointer;border-bottom:1px solid rgba(51,65,85,.4)"
+      style="padding:6px 10px;cursor:pointer;border-bottom:1px solid rgba(197,213,240,.4)"
       onmouseover="this.style.background='var(--s3)'" onmouseout="this.style.background=''">
       ${v.icon} ${f}
     </div>`).join('');
@@ -2996,7 +3048,7 @@ function editQuote(code, id) {
 
   const formHtml = `
     <div class="quote-edit-form" style="margin-top:8px;padding:8px 10px;
-      background:var(--s3);border-radius:var(--r);border:1px solid rgba(8,145,178,.3)">
+      background:var(--s3);border-radius:var(--r);border:1px solid rgba(39,110,241,.3)">
       <div style="font-size:10px;font-weight:600;color:var(--cyn);margin-bottom:7px">✏ 견적 수정</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:5px">
         <div>
@@ -3148,10 +3200,10 @@ function buildSvgLineChart(data, years, color, unit, data2, color2, label, label
   const gridLines=yTicks.map(v=>{
     const y=yPos(v).toFixed(1);
     const lbl=Math.abs(v)>=1000?(v/1000).toFixed(1)+'B':v.toFixed(v%1?1:0)+unit;
-    return `<line x1="${PL}" x2="${W-PR}" y1="${y}" y2="${y}" stroke="rgba(51,65,85,.5)" stroke-width="1" stroke-dasharray="3"/>
-      <text x="${PL-3}" y="${parseFloat(y)+3}" text-anchor="end" fill="#475569" font-size="8">${lbl}</text>`;
+    return `<line x1="${PL}" x2="${W-PR}" y1="${y}" y2="${y}" stroke="rgba(197,213,240,.5)" stroke-width="1" stroke-dasharray="3"/>
+      <text x="${PL-3}" y="${parseFloat(y)+3}" text-anchor="end" fill="#3d5a80" font-size="8">${lbl}</text>`;
   }).join('');
-  const xLabels=years.map((yr,i)=>`<text x="${xPos(i).toFixed(1)}" y="${H-8}" text-anchor="middle" fill="#475569" font-size="9">${yr}</text>`).join('');
+  const xLabels=years.map((yr,i)=>`<text x="${xPos(i).toFixed(1)}" y="${H-8}" text-anchor="middle" fill="#3d5a80" font-size="9">${yr}</text>`).join('');
   const makeDots=(arr,clr)=>arr.map((v,i)=>{
     const lbl=Math.abs(v)>=1000?(v/1000).toFixed(1)+'B':v+unit;
     return `<circle cx="${xPos(i).toFixed(1)}" cy="${yPos(v).toFixed(1)}" r="3.5" fill="${clr}" stroke="var(--s2)" stroke-width="1.5"/>
@@ -3184,7 +3236,7 @@ function renderFinTab(d) {
   const noFinData = !hasSales && !(fin.신용 && fin.신용 !== '—');
 
   const salesChartHtml = hasSales
-    ? buildSvgLineChart(fin.매출, fin.매출연도, '#0891b2', 'M',
+    ? buildSvgLineChart(fin.매출, fin.매출연도, '#276EF1', 'M',
         hasOpr ? fin.영업이익률.map(r=>r*(Math.max(...fin.매출)/10)) : null,
         '#10b981', '매출(백만)', hasOpr ? '영업이익률(배율)' : null)
     : '';
@@ -3468,7 +3520,7 @@ async function checkNtsDelinquency(code) {
 
   if (resultEl) {
     resultEl.innerHTML = `
-      <div style="padding:6px 8px;border-radius:4px;background:rgba(8,145,178,.06)">
+      <div style="padding:6px 8px;border-radius:4px;background:rgba(39,110,241,.06)">
         ${bizStatusHtml}
         <div style="font-size:10px;color:var(--txt2);margin-bottom:5px">
           국세청 고액체납(2억+) 명단은 분기별 공개됩니다.
@@ -3529,7 +3581,7 @@ async function checkBizStatus(code) {
 
     if (resultEl) {
       resultEl.innerHTML = `
-        <div style="padding:5px 8px;border-radius:4px;background:rgba(8,145,178,.05)">
+        <div style="padding:5px 8px;border-radius:4px;background:rgba(39,110,241,.05)">
           <span style="color:${statusColor};font-weight:500">${status}</span>
           ${taxType ? `<span style="color:var(--txt3);margin-left:8px;font-size:10px">${taxType}</span>` : ''}
           <div style="font-size:9px;color:var(--txt3);margin-top:2px">사업자번호: ${bizNo}</div>
@@ -3621,7 +3673,7 @@ async function dartSingle(code) {
       if (!corpCode) {
         // 공시 미등록 업체 안내
         statusEl.innerHTML = `
-          <div style="padding:8px 10px;background:rgba(51,65,85,.4);border-radius:var(--r);font-size:10px">
+          <div style="padding:8px 10px;background:rgba(197,213,240,.4);border-radius:var(--r);font-size:10px">
             <div style="font-weight:600;color:var(--txt);margin-bottom:3px">📋 공시 미등록 업체</div>
             <div style="color:var(--txt3);line-height:1.6">
               DART에 공시 의무가 없는 비상장·중소기업입니다.<br>
@@ -3839,7 +3891,7 @@ function renderShadowTab(d) {
                     ${date ? `<span style="font-size:9px;color:var(--txt3)">${date}</span>` : ''}
                     ${finalUrl ? `<a href="${finalUrl}" target="_blank"
                       style="font-size:10px;color:var(--cyn);text-decoration:none;padding:1px 5px;
-                        border:1px solid rgba(8,145,178,.3);border-radius:4px"
+                        border:1px solid rgba(39,110,241,.3);border-radius:4px"
                       title="${url?'출처 직접링크':source+'에서 검색'}">🔗 ${source||'링크'}</a>` :
                       source ? `<span class="shadow-source-tag" style="background:${srcClr}22;color:${srcClr}">${source}</span>` : ''}
                   </div>
@@ -3848,7 +3900,7 @@ function renderShadowTab(d) {
                 <!-- AI 분석 -->
                 ${analysis.insight ? `
                 <div style="margin-top:4px;padding:3px 7px;border-radius:4px;
-                  background:${analysis.risk?'rgba(239,68,68,.06)':'rgba(8,145,178,.06)'};
+                  background:${analysis.risk?'rgba(239,68,68,.06)':'rgba(39,110,241,.06)'};
                   border-left:2px solid ${analysis.risk?'var(--red)':'var(--cyn)'}">
                   <span style="font-size:9px;color:${analysis.risk?'var(--red)':'var(--cyn)'};font-weight:500">
                     ${analysis.risk?'⚠ 리스크':'💡 인사이트'}</span>
@@ -3865,7 +3917,7 @@ function renderShadowTab(d) {
                       onclick="toggleShadowKw(this,'${d.code}','${kw}')"
                       style="font-size:9px;padding:1px 6px;border-radius:10px;cursor:pointer;
                         ${itemStatus==='approved'
-                          ? 'border:1px solid var(--cyn);background:rgba(8,145,178,.15);color:var(--cyn)'
+                          ? 'border:1px solid var(--cyn);background:rgba(39,110,241,.15);color:var(--cyn)'
                           : 'border:1px dashed var(--cyn);color:var(--cyn)'}">
                       ${itemStatus==='approved'?'✓ ':'+ '}${kw}
                     </span>`).join('')}
@@ -4212,7 +4264,7 @@ function checkAdm() {
     document.body.classList.add('adm-mode');
     document.getElementById('adm-login-modal').classList.remove('open');
     document.getElementById('adm-btn').textContent = '🔐 관리자 ON';
-    document.getElementById('adm-btn').style.background = 'rgba(232,98,46,.2)';
+    document.getElementById('adm-btn').style.background = 'rgba(39,110,241,.2)';
     document.getElementById('adm-pw').value = '';
     // 열려있는 상세 패널 갱신
     if (_curCode) {
@@ -4698,7 +4750,7 @@ function toggleShadowKw(el, code, kw) {
     el.textContent = '+ ' + kw;
   } else {
     el.dataset.active = '1';
-    el.style.background = 'rgba(8,145,178,.15)';
+    el.style.background = 'rgba(39,110,241,.15)';
     el.style.border = '1px solid var(--cyn)';
     el.textContent = '✓ ' + kw;
   }
@@ -4770,15 +4822,33 @@ async function testNaverKey() {
   const resEl = document.getElementById('naver-test-result');
   if (resEl) { resEl.style.display = 'block'; resEl.innerHTML = '<span class="spinner"></span> 테스트 중...'; }
 
+  const naverHeaders = { 'X-Naver-Client-Id': cid, 'X-Naver-Client-Secret': sec };
+  const apiUrl = `https://openapi.naver.com/v1/search/webkr.json?query=${encodeURIComponent('한국콜마 화장품')}&display=3`;
+
   try {
-    const url = `https://openapi.naver.com/v1/search/webkr.json?query=${encodeURIComponent('한국콜마 화장품')}&display=3`;
-    const resp = await fetchTimeout(url, {
-      headers: {
-        'X-Naver-Client-Id': cid,
-        'X-Naver-Client-Secret': sec,
-      }
-    }, 8000);
+    let resp;
+    // 직접 호출 시도 → CORS 실패 시 corsproxy.io 경유
+    try {
+      resp = await fetchTimeout(apiUrl, { headers: naverHeaders }, 5000);
+    } catch(corsErr) {
+      const proxyUrl = `https://corsproxy.io/?url=${encodeURIComponent(apiUrl)}`;
+      resp = await fetchTimeout(proxyUrl, { headers: naverHeaders }, 8000);
+    }
+
+    if (resp.status === 401 || resp.status === 403) {
+      if (resEl) resEl.innerHTML = `<span style="color:var(--red)">❌ 인증 실패 (${resp.status}) — Client ID / Secret을 확인하세요</span>`;
+      return;
+    }
+    if (!resp.ok) {
+      if (resEl) resEl.innerHTML = `<span style="color:var(--red)">❌ API 오류 (HTTP ${resp.status})</span>`;
+      return;
+    }
+
     const data = await resp.json();
+    if (data.errorCode) {
+      if (resEl) resEl.innerHTML = `<span style="color:var(--red)">❌ ${data.errorMessage} (${data.errorCode})</span>`;
+      return;
+    }
     if (data.items?.length > 0) {
       const domains = data.items.map(it => it.link.replace(/^https?:\/\//,'').split('/')[0]).slice(0,3);
       if (resEl) resEl.innerHTML = `<span style="color:var(--grn)">✅ 연동 성공! 검색결과 ${data.total}건 | 도메인: ${domains.join(', ')}</span>`;
@@ -4787,7 +4857,10 @@ async function testNaverKey() {
       if (resEl) resEl.innerHTML = `<span style="color:var(--yel)">⚠ 결과 없음 (API 연결은 정상)</span>`;
     }
   } catch(e) {
-    if (resEl) resEl.innerHTML = `<span style="color:var(--red)">❌ 오류: ${e.message?.slice(0,50)} — Client Secret을 확인하세요</span>`;
+    const isCors = e.message?.includes('CORS') || e.message?.includes('Failed to fetch') || e.message?.includes('NetworkError');
+    if (resEl) resEl.innerHTML = isCors
+      ? `<span style="color:var(--red)">❌ CORS 차단 — 네이버 개발자센터에서 사용 환경에 <b>${location.hostname}</b> 도메인을 등록해주세요</span>`
+      : `<span style="color:var(--red)">❌ 오류: ${e.message?.slice(0,60)}</span>`;
   }
 }
 
@@ -4913,7 +4986,7 @@ async function niceSubmit(code) {
   d.fin.nice_조회시작 = today;
 
   msgEl.innerHTML = `
-    <div style="background:rgba(8,145,178,.06);border-radius:var(--r);padding:8px 10px">
+    <div style="background:rgba(39,110,241,.06);border-radius:var(--r);padding:8px 10px">
       <div style="font-size:10px;font-weight:600;color:var(--cyn);margin-bottom:6px">
         📋 b-wise 조회 방법
       </div>
@@ -6314,7 +6387,7 @@ function updateCrawlStage(idx, status) {
   const el = document.getElementById(`cstage-${idx}`);
   if (!el) return;
   const colors = {
-    active: { bg:'rgba(8,145,178,.2)', color:'var(--cyn)', border:'var(--cyn)' },
+    active: { bg:'rgba(39,110,241,.2)', color:'var(--cyn)', border:'var(--cyn)' },
     done:   { bg:'rgba(16,185,129,.15)', color:'var(--grn)', border:'var(--grn)' },
     skip:   { bg:'rgba(100,116,139,.1)', color:'var(--txt3)', border:'var(--bd)' },
   };
@@ -6341,9 +6414,9 @@ function showCrawlTags(tags) {
   const list = document.getElementById('crawl-tag-list');
   if (!wrap || !list) return;
   const catColors = {
-    '🏆':'rgba(245,158,11,.15)','💧':'rgba(8,145,178,.15)',
+    '🏆':'rgba(245,158,11,.15)','💧':'rgba(39,110,241,.15)',
     '⚙':'rgba(139,92,246,.15)', '🔬':'rgba(16,185,129,.15)',
-    '🌿':'rgba(16,185,129,.1)', '🌍':'rgba(8,145,178,.1)',
+    '🌿':'rgba(16,185,129,.1)', '🌍':'rgba(39,110,241,.1)',
   };
   list.innerHTML = tags.slice(0,12).map(t => {
     const icon = Object.keys(catColors).find(k=>t.includes(k)) || '';
@@ -6406,7 +6479,7 @@ function runMfdsStep4() {
         ${rows.map(r => `
         <tr>
           <td style="font-weight:600">${r.label}
-            ${r.label==='업체명'?'<span style="font-size:8px;padding:1px 4px;border-radius:2px;background:rgba(232,98,46,.1);color:var(--acc);margin-left:3px">B-4</span>':''}
+            ${r.label==='업체명'?'<span style="font-size:8px;padding:1px 4px;border-radius:2px;background:rgba(39,110,241,.1);color:var(--acc);margin-left:3px">B-4</span>':''}
             ${r.label==='주소'?'<span style="font-size:8px;padding:1px 4px;border-radius:2px;background:rgba(16,185,129,.1);color:var(--grn);margin-left:3px">B-5</span>':''}
           </td>
           <td class="${r.changed ? 'mfds-diff-old' : 'mfds-same'}"
@@ -6498,8 +6571,9 @@ async function runMfdsStep5() {
 
       const searchQueries = [
         { q: entpName,                              label: '1차: 업체명 단독' },
-        { q: `${entpName} ${addrLabel}`,            label: `2차: 업체명+주소(${addrLabel})` },
-        { q: `${entpName} 화장품`,                  label: '3차: 업체명+화장품' },
+        ...(bossName ? [{ q: `${entpName} ${bossName}`, label: `2차: 업체명+대표자(${bossName})` }] : []),
+        { q: `${entpName} ${addrLabel}`,            label: `3차: 업체명+주소(${addrLabel})` },
+        { q: `${entpName} 화장품`,                  label: '4차: 업체명+화장품' },
       ];
 
       // 도메인 필터 — 검색포털/SNS/취업사이트 제외
@@ -6516,46 +6590,100 @@ async function runMfdsStep5() {
         d && d.includes('.') && d.length < 50 &&
         !EXCLUDE_DOMAINS.some(ex => d.includes(ex));
 
+      // 검색결과 HTML에서 도메인 추출 — Google의 /url?q= 리다이렉트 래핑과
+      // 일반 href 링크를 모두 처리 (기존엔 /url?q= 패턴을 못 잡아 Google 결과를
+      // 거의 추출하지 못했음 — 핵심 버그)
+      function extractDomainsFromHtml(text) {
+        const urls = [];
+        // 1) Google 리다이렉트 래핑: href="/url?q=https://...&sa=..."
+        (text.match(/\/url\?q=(https?:\/\/[^&"]+)/g) || []).forEach(m => {
+          try { urls.push(decodeURIComponent(m.replace(/^\/url\?q=/, ''))); } catch {}
+        });
+        // 2) 일반 href="https://..."
+        (text.match(/href="(https?:\/\/[^"]+)"/g) || []).forEach(m => {
+          urls.push(m.replace(/^href="/, '').replace(/"$/, ''));
+        });
+        // 3) 본문에 노출된 순수 URL
+        (text.match(/https?:\/\/[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}[^\s"'<>]*/g) || []).forEach(u => urls.push(u));
+
+        return [...new Set(
+          urls.map(u => u.replace(/^https?:\/\//, '').split('/')[0].split('?')[0].split('&')[0])
+        )].filter(isDomainOk);
+      }
+
       for (const sq of searchQueries) {
         if (hpCandidates.length >= 5) break; // 이미 충분한 후보 있으면 중단
 
         addLog(`[--] ${sq.label} 검색 중...`);
-        const gUrl = `https://www.google.com/search?q=${encodeURIComponent(sq.q)}&hl=ko&num=10`;
 
         try {
           let domains_from_search = [];
 
-          // ── Naver Search API 우선 시도 ──────────────────────
+          // ── Naver Search API 우선 시도 (직접 → corsproxy 폴백) ──
           if (naverCid && naverSec) {
             try {
               const naverUrl = `https://openapi.naver.com/v1/search/webkr.json?query=${encodeURIComponent(sq.q)}&display=10`;
-              const nResp = await fetchTimeout(naverUrl, {
-                headers: {
-                  'X-Naver-Client-Id': naverCid,
-                  'X-Naver-Client-Secret': naverSec,
-                }
-              }, 8000);
-              if (nResp.ok) {
+              const naverHdrs = { 'X-Naver-Client-Id': naverCid, 'X-Naver-Client-Secret': naverSec };
+              let nResp;
+              try {
+                // 1차: 직접 호출
+                nResp = await fetchTimeout(naverUrl, { headers: naverHdrs }, 5000);
+              } catch {
+                // 2차: CORS 차단 시 corsproxy.io 경유 (헤더 포워딩 지원)
+                addLog('[NAVER] 직접 호출 CORS 차단 → corsproxy 경유 재시도...', 'warn');
+                const proxyUrl = `https://corsproxy.io/?url=${encodeURIComponent(naverUrl)}`;
+                nResp = await fetchTimeout(proxyUrl, { headers: naverHdrs }, 8000);
+              }
+              if (nResp?.ok) {
                 const nData = await nResp.json();
-                domains_from_search = (nData.items || [])
-                  .map(it => it.link.replace(/^https?:\/\//,'').split('/')[0])
-                  .filter(isDomainOk);
-                addLog(`[NAVER] ${sq.label} → ${domains_from_search.length}개 도메인`, 'ok');
+                if (nData.errorCode) {
+                  addLog(`[NAVER] API 오류: ${nData.errorMessage} (${nData.errorCode})`, 'warn');
+                } else {
+                  domains_from_search = (nData.items || [])
+                    .map(it => it.link.replace(/^https?:\/\//,'').split('/')[0])
+                    .filter(isDomainOk);
+                  addLog(`[NAVER] ${sq.label} → ${domains_from_search.length}개 도메인`, 'ok');
+                }
+              } else if (nResp?.status === 401 || nResp?.status === 403) {
+                addLog(`[NAVER] 인증 실패 (${nResp.status}) — Client ID/Secret 확인 필요`, 'warn');
               }
             } catch(ne) {
-              addLog(`[WARN] Naver API 실패: ${ne.message?.slice(0,30)} → CORS 탐색으로 전환`, 'warn');
+              addLog(`[WARN] Naver API 실패: ${ne.message?.slice(0,40)} → 프록시 탐색으로 전환`, 'warn');
             }
           }
 
-          // ── Naver API 결과 없을 때 CORS 프록시 fallback ─────
+          // ── Naver 결과 없을 때 검색엔진 스크래핑 fallback ──
+          // DuckDuckGo HTML lite → Bing → Google 순서 (스크래핑 차단이 덜한 순)
           if (!domains_from_search.length) {
-            const text = await fetchWithProxyGlobal(gUrl);
-            if (!text) { addLog(`[WARN] ${sq.label} — 프록시 차단`, 'warn'); continue; }
-            domains_from_search = [
-              ...(text.match(/href="https?:\/\/([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})[^"]*"/g) || []),
-              ...(text.match(/https?:\/\/([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})[/"]/g) || []),
-            ].map(m => m.replace(/href="/, '').replace(/^https?:\/\//, '').split('/')[0].split('"')[0])
-             .filter(isDomainOk);
+            const ddgUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(sq.q)}`;
+            const ddgText = await fetchWithProxyGlobal(ddgUrl);
+            if (ddgText) {
+              domains_from_search = extractDomainsFromHtml(ddgText);
+              if (domains_from_search.length) addLog(`[DDG] ${sq.label} → ${domains_from_search.length}개 도메인`, 'ok');
+            }
+          }
+
+          if (!domains_from_search.length) {
+            const bUrl = `https://www.bing.com/search?q=${encodeURIComponent(sq.q)}&setlang=ko`;
+            const bText = await fetchWithProxyGlobal(bUrl);
+            if (bText) {
+              domains_from_search = extractDomainsFromHtml(bText);
+              if (domains_from_search.length) addLog(`[BING] ${sq.label} → ${domains_from_search.length}개 도메인`, 'ok');
+            }
+          }
+
+          if (!domains_from_search.length) {
+            const gUrl = `https://www.google.com/search?q=${encodeURIComponent(sq.q)}&hl=ko&num=10`;
+            const gText = await fetchWithProxyGlobal(gUrl);
+            if (gText) {
+              domains_from_search = extractDomainsFromHtml(gText);
+              if (domains_from_search.length) addLog(`[GOOGLE] ${sq.label} → ${domains_from_search.length}개 도메인`, 'ok');
+            }
+          }
+
+          if (!domains_from_search.length) {
+            addLog(`[WARN] ${sq.label} — 모든 검색엔진 차단/결과없음`, 'warn');
+            continue;
           }
 
           // ── 이하 공통 처리 ───────────────────────────────────
@@ -6684,7 +6812,7 @@ async function runMfdsStep5() {
   const gUrl = `https://www.google.com/search?q=${gQ}`;
 
   const hpEl = document.createElement('div');
-  hpEl.style.cssText = 'margin-top:10px;padding:10px;background:rgba(8,145,178,.06);border:1px solid rgba(8,145,178,.3);border-radius:var(--r)';
+  hpEl.style.cssText = 'margin-top:10px;padding:10px;background:rgba(39,110,241,.06);border:1px solid rgba(39,110,241,.3);border-radius:var(--r)';
 
   const resultsHtml = hpCandidates.length > 0
     ? hpCandidates.slice(0,4).map((r,i) => {
@@ -6828,7 +6956,7 @@ function applyManualKeywords(code) {
       </div>
       <div style="display:flex;gap:3px;flex-wrap:wrap">
         ${allKws.map(k=>`<span style="font-size:9px;padding:1px 7px;border-radius:10px;
-          background:rgba(8,145,178,.12);color:var(--cyn)">${k}</span>`).join('')}
+          background:rgba(39,110,241,.12);color:var(--cyn)">${k}</span>`).join('')}
       </div>
     </div>`;
   }
@@ -6873,13 +7001,30 @@ async function startStep5Crawl() {
         </div>
         <div style="display:flex;gap:3px;flex-wrap:wrap">
           ${kws.slice(0,12).map(k=>`<span style="font-size:9px;padding:1px 7px;border-radius:10px;
-            background:rgba(8,145,178,.12);color:var(--cyn)">${k}</span>`).join('')}
+            background:rgba(39,110,241,.12);color:var(--cyn)">${k}</span>`).join('')}
         </div>
       </div>`
-    : `<div style="margin-top:6px;padding:7px 10px;background:rgba(245,158,11,.07);
-        border:1px solid rgba(245,158,11,.25);border-radius:var(--r);font-size:10px;color:var(--yel)">
-        ⚠ 키워드 추출 결과 없음 — SPA 사이트이거나 접근이 차단됐습니다.<br>
-        <span style="color:var(--txt3);font-size:9px">수동으로 태그를 입력하거나 다른 URL을 시도해 보세요.</span>
+    : `<div style="margin-top:6px;padding:9px 12px;background:rgba(245,158,11,.07);
+        border:1px solid rgba(245,158,11,.3);border-radius:var(--r)">
+        <div style="font-size:10px;font-weight:600;color:var(--yel);margin-bottom:5px">
+          🟡 자동 키워드 추출 실패 — 수동 입력 필요
+        </div>
+        <div style="font-size:9px;color:var(--txt3);margin-bottom:6px">
+          SPA(React/Next.js) 사이트이거나 프록시 차단 상태입니다.<br>
+          아래에 직접 태그를 입력하거나 홈페이지를 직접 확인해 주세요.
+        </div>
+        <div style="display:flex;gap:5px">
+          <input type="text" id="step5-manual-kw" placeholder="OEM, CGMP인증, 마스크팩, 헤어케어..."
+            style="flex:1;padding:5px 8px;background:var(--s3);border:1px solid var(--bd);
+            border-radius:var(--r);color:var(--txt);font-size:10px;outline:none">
+          <button onclick="applyStep5ManualKw('${domain}')"
+            style="padding:4px 10px;border-radius:var(--r);border:1px solid var(--acc);
+            background:var(--acc);color:#fff;font-size:10px;cursor:pointer;white-space:nowrap">추가</button>
+        </div>
+        <div style="margin-top:5px;font-size:9px;color:var(--txt3)">
+          또는 <a href="https://www.google.com/search?q=${encodeURIComponent(domain+' 화장품')}"
+          target="_blank" style="color:var(--cyn)">구글로 확인 →</a>
+        </div>
       </div>`;
 
   const crawlContainer = document.getElementById('m5-crawl');
@@ -6894,6 +7039,30 @@ async function startStep5Crawl() {
 
   const confirm = document.getElementById('m5-direct-confirm');
   if (confirm) confirm.style.display = 'block';
+}
+
+function applyStep5ManualKw(domain) {
+  const inp = document.getElementById('step5-manual-kw');
+  if (!inp || !inp.value.trim()) return;
+  const kws = inp.value.split(/[,，]+/).map(k => k.trim()).filter(Boolean);
+  if (!_mfds.crawlData) _mfds.crawlData = {};
+  if (!_mfds.crawlData.hpKeywords) _mfds.crawlData.hpKeywords = [];
+  kws.forEach(k => { if (!_mfds.crawlData.hpKeywords.includes(k)) _mfds.crawlData.hpKeywords.push(k); });
+  // 결과 요약 갱신
+  const allKws = _mfds.crawlData.hpKeywords;
+  const sumEl = document.getElementById('m5-crawl-result-summary');
+  if (sumEl) {
+    sumEl.innerHTML = `<div style="margin-top:8px;padding:8px 10px;background:rgba(16,185,129,.07);
+      border:1px solid rgba(16,185,129,.25);border-radius:var(--r)">
+      <div style="font-size:10px;font-weight:600;color:var(--grn);margin-bottom:5px">
+        ✅ 수동 입력 완료 — ${allKws.length}개 태그
+      </div>
+      <div style="display:flex;gap:3px;flex-wrap:wrap">
+        ${allKws.map(k=>`<span style="font-size:9px;padding:1px 7px;border-radius:10px;
+          background:rgba(39,110,241,.12);color:var(--cyn)">${k}</span>`).join('')}
+      </div></div>`;
+  }
+  showToast(`✅ 키워드 ${kws.length}개 추가됨`);
 }
 
 function runMfdsStep6() {
@@ -6921,7 +7090,7 @@ function runMfdsStep6() {
         </label>
       </div>`).join('')}
     ${_mfds.crawlData?.hp !== undefined ? `
-    <div style="margin-top:8px;padding:7px 9px;background:rgba(8,145,178,.08);border:1px solid rgba(8,145,178,.3);border-radius:4px;font-size:11px">
+    <div style="margin-top:8px;padding:7px 9px;background:rgba(39,110,241,.08);border:1px solid rgba(39,110,241,.3);border-radius:4px;font-size:11px">
       🌐 홈페이지: <strong style="color:var(--cyn)">${_mfds.crawlData.hp||'없음'}</strong>
       <span style="color:var(--txt3);margin-left:4px">${_mfds.crawlData.hp_status||''}</span><br>
       <input type="checkbox" id="uf-hp" checked style="accent-color:var(--cyn)">
@@ -7028,7 +7197,7 @@ function switchM6Tab(tab) {
     if(tf){tf.style.background='var(--s3)';tf.style.color='var(--txt2)';tf.style.fontWeight='400';}
   } else {
     f.style.display='block'; s.style.display='none';
-    if(tf){tf.style.background='rgba(8,145,178,.1)';tf.style.color='var(--cyn)';tf.style.fontWeight='500';}
+    if(tf){tf.style.background='rgba(39,110,241,.1)';tf.style.color='var(--cyn)';tf.style.fontWeight='500';}
     if(ts){ts.style.background='var(--s3)';ts.style.color='var(--txt2)';ts.style.fontWeight='400';}
   }
 }
@@ -7272,7 +7441,7 @@ function switchM7Tab(tab) {
     if (tFin)    { tFin.style.background    = 'var(--s3)';           tFin.style.color    = 'var(--txt2)'; tFin.style.fontWeight = '400'; }
   } else {
     sFin.style.display = 'block'; sShadow.style.display = 'none';
-    if (tFin)    { tFin.style.background    = 'rgba(8,145,178,.1)'; tFin.style.color    = 'var(--cyn)'; tFin.style.fontWeight = '500'; }
+    if (tFin)    { tFin.style.background    = 'rgba(39,110,241,.1)'; tFin.style.color    = 'var(--cyn)'; tFin.style.fontWeight = '500'; }
     if (tShadow) { tShadow.style.background = 'var(--s3)';          tShadow.style.color = 'var(--txt2)'; tShadow.style.fontWeight = '400'; }
   }
 }
@@ -7422,9 +7591,9 @@ async function crawlManualUrl(code) {
           text.includes('"status":{"http_code":0}') ||
           // 로그인 리다이렉트 페이지 (실제 콘텐츠 없음)
           (text.includes('login') && text.includes('password') && text.length < 3000) ||
-          // 빈 응답 또는 너무 짧음
+          // 빈 응답 또는 너무 짧음 (한국어 포함 시 예외)
           text.trim() === '' ||
-          (text.length < 200);
+          (text.length < 100 && !/[가-힣]{4,}/.test(text));
         if (!isBlockedResp) return text;
       } catch { /* 다음 프록시 */ }
     }
@@ -7518,9 +7687,32 @@ async function crawlManualUrl(code) {
   const _crawlDeadline = Date.now() + 60000;
   function crawlTimedOut() { return Date.now() > _crawlDeadline; }
 
+  // ── 프로토콜 사전 감지 (HTTP-only 사이트 대응) ──────────
+  // 도메인만 입력하면 기본 https로 가정하지만, SSL 미설치 구형 사이트는
+  // https 연결 자체가 막혀 매 경로(CRAWL_PATHS)마다 프록시 3회를 헛되이
+  // 소모한 뒤에야 http로 넘어간다. 시작 전 1회만 검증해 베이스를 고정한다.
+  addLog('[프로토콜] 접속 가능한 주소 확인 중...');
+  async function quickProbe(testUrl) {
+    try {
+      const r = await fetchTimeout(`https://corsproxy.io/?url=${encodeURIComponent(testUrl)}`, {}, 4000);
+      if (!r.ok) return false;
+      const buf = await r.arrayBuffer();
+      return buf && buf.byteLength > 50;
+    } catch { return false; }
+  }
+  let verifiedBase = null;
+  for (const candBase of [`https://${domain}`, `http://${domain}`, `https://www.${domain}`, `http://www.${domain}`]) {
+    if (await quickProbe(candBase)) { verifiedBase = candBase; break; }
+  }
+  if (verifiedBase) {
+    addLog(`[OK] 접속 확인: ${verifiedBase}`, 'ok');
+  } else {
+    addLog('[WARN] 프로토콜 사전 확인 실패 — 입력한 URL로 계속 진행', 'warn');
+  }
+
   updateCrawlStage(0,'active'); // 영문탐색 시작
   addLog(`[1차] 영문 페이지 탐색 시작...`);
-  const baseUrlClean = url.replace(/\/$/, '');
+  const baseUrlClean = (verifiedBase || url).replace(/\/$/, '');
 
   let crawlSuccess = false;
   let foundKeywords = [];
@@ -7732,6 +7924,15 @@ async function crawlManualUrl(code) {
         addLog('  ① SPA(React/Next.js) — JS 실행 전 콘텐츠 없음', 'warn');
         addLog('  ② 모든 경로가 동일 응답 반환 (리다이렉트)', 'warn');
         addLog('  ③ 화장품 텍스트가 이미지로만 존재', 'warn');
+        // 식약처 데이터 기반 자동 키워드 생성
+        const _mfdsEl = _mfds.selected;
+        if (_mfdsEl) {
+          const ind = (_mfdsEl.INDUTY || '');
+          if (ind.includes('화장품')) foundKeywords.push('화장품제조업');
+          if (ind.includes('의약외품')) foundKeywords.push('의약외품겸업');
+          if (foundKeywords.length > 0)
+            addLog(`[MFDS폴백] 업종(${ind})에서 키워드 자동 추가 → ${foundKeywords.join(', ')}`, 'warn');
+        }
         // 수동 입력 UI를 결과 영역에 표시
         const resDiv = document.createElement('div');
         resDiv.id = 'm5-manual-kw-input';
@@ -7792,7 +7993,7 @@ async function crawlManualUrl(code) {
       const tagHtml = foundKeywords.map(kw => {
         const icon = Object.entries(catIcons).find(([k]) => kw.includes(k))?.[1] || '📌';
         return `<span style="font-size:10px;padding:2px 7px;border-radius:10px;
-          background:rgba(8,145,178,.12);color:var(--cyn);white-space:nowrap">
+          background:rgba(39,110,241,.12);color:var(--cyn);white-space:nowrap">
           ${icon} ${kw}</span>`;
       }).join('');
 
@@ -7814,6 +8015,53 @@ async function crawlManualUrl(code) {
       }
 
   } // end if crawledPages > 0
+
+  // ─── MFDS 데이터 기반 키워드 폴백 (크롤링 0페이지 or 키워드 0개) ───
+  if (!_mfds.crawlData.hpKeywords?.length) {
+    const sel = _mfds.selected;
+    const dbEntry = _mfds.code ? DB.find(x => x.code === _mfds.code) : null;
+    const fallbackKws = [];
+
+    if (sel) {
+      const ind = (sel.INDUTY || '');
+      if (ind.includes('화장품')) fallbackKws.push('화장품제조업');
+      if (ind.includes('의약외품')) fallbackKws.push('의약외품겸업');
+      if (ind && !fallbackKws.some(k => k === ind)) fallbackKws.push(ind);
+      // 지역 키워드
+      const sido = (sel.FACTORY_ADDR || '').split(' ')[0];
+      if (sido && sido.length <= 4 && sido.length > 1) fallbackKws.push(sido + '소재');
+    }
+    // 기존 DB 태그 활용
+    if (dbEntry) {
+      (dbEntry.tags || []).slice(0, 12).forEach(t => {
+        if (!fallbackKws.includes(t)) fallbackKws.push(t);
+      });
+    }
+    // 절대 마지막 보루 — 도메인 이름이라도 저장 (공백 방지)
+    if (fallbackKws.length === 0) fallbackKws.push('화장품제조업체', domain);
+
+    addLog(`[MFDS폴백] 크롤링 실패 — ${sel?'식약처 업종':'도메인'} 기반 키워드 ${fallbackKws.length}개 자동 생성`, 'warn');
+    _mfds.crawlData.hpKeywords = fallbackKws;
+    // 결과 UI 표시
+    if (resultEl) {
+      const tagHtml = fallbackKws.map(k =>
+        `<span style="font-size:10px;padding:2px 7px;border-radius:10px;
+          background:rgba(245,158,11,.13);color:var(--yel);white-space:nowrap">📌 ${k}</span>`
+      ).join('');
+      resultEl.innerHTML = `
+        <div style="background:rgba(245,158,11,.06);border:1px solid var(--yel);
+          border-radius:var(--r);padding:8px 10px;margin-top:6px">
+          <div style="font-size:11px;font-weight:600;color:var(--yel);margin-bottom:6px">
+            🟡 자동 크롤링 실패 — 기본 키워드 ${fallbackKws.length}개 자동 생성
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px">${tagHtml}</div>
+          <div style="font-size:10px;color:var(--txt3)">
+            홈페이지 직접 확인 후 수동으로 태그를 추가하거나 DB 반영 버튼을 클릭하세요
+          </div>
+        </div>`;
+      resultEl.style.display = 'block';
+    }
+  }
 
   if (crawlSuccess) return;
 
@@ -7954,6 +8202,18 @@ async function crawlManualUrl(code) {
     '동물실험 없음':'동물실험없음','Cruelty-Free':'동물실험없음',
     '기능성화장품':'기능성화장품','자외선차단':'선케어기능성','미백':'미백기능성',
     '주름개선':'주름개선기능성','탈모':'탈모기능성',
+    // 헤어 / 의약외품
+    '퍼머넌트웨이브':'퍼머넌트(의약외품)','퍼머넌트':'퍼머넌트(의약외품)',
+    '퍼머':'퍼머(의약외품)','파마':'파마(의약외품)',
+    '염모제':'염모제(의약외품)','염모':'염모제(의약외품)',
+    '탈색제':'탈색제(의약외품)','탈색':'탈색제(의약외품)',
+    '스트레이트크림':'스트레이트크림(의약외품)','스트레이트':'스트레이트크림(의약외품)',
+    '두발용':'두발용화장품','모발':'모발케어','두피':'두피케어','두피케어':'두피케어',
+    '헤어컬러':'헤어컬러','헤어다이':'헤어다이','헤어마스크':'헤어마스크팩',
+    '헤어오일':'헤어오일','컨디셔너':'헤어컨디셔너',
+    // 제조업 일반
+    '화장품제조업':'화장품제조업','화장품제조':'화장품제조',
+    '화장품공장':'화장품제조공장','제조공장':'화장품제조공장',
   };
 
   function extractByRegex(text) {
