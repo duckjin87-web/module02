@@ -1799,10 +1799,18 @@ function buildUrlFallbackChain(rawUrl) {
   ])];
 }
 
-// [B-2] SPA 감지 (JS 전용 빈 응답) — Next.js/Nuxt/imweb/카페24 지문 포함
+// [B-2] SPA 감지 (JS 전용 빈 응답) — 진짜 클라이언트 렌더링 SPA만 식별
+// [재설계] imweb/카페24/고도몰 등 "빌더 플랫폼"은 SPA가 아니라 서버에서
+// 완전한 HTML(본문 텍스트 포함)을 내려주는 정적 사이트에 가깝다.
+// 과거엔 'imweb.me' 문자열이 응답에 포함되기만 하면(스크립트 경로 등에서
+// 흔히 등장) 무조건 SPA로 간주해 fetchWithProxyGlobal이 결과를 폐기했고,
+// 이로 인해 셀랩(cellab.imweb.me) 같은 정상 홈페이지가 항상 "접근불가"로
+// 스킵되었음 — 플랫폼 사용 여부와 실제 콘텐츠 추출 가능 여부는 별개이므로
+// 빌더 플랫폼 지문은 제거하고, 실제 JS-only 셸 프레임워크 지문 + 본문量
+// 휴리스틱만으로 판단한다.
 function isSPAResponse(text) {
   if (!text || text.trim().length < 500) return true;
-  // SPA 프레임워크 지문 직접 감지
+  // 진짜 클라이언트 전용 렌더링 프레임워크 지문만 감지
   const spaFingerprints = [
     '__NEXT_DATA__',        // Next.js
     '__NUXT__',             // Nuxt.js
@@ -1812,18 +1820,13 @@ function isSPAResponse(text) {
     '__vue__',              // Vue devtools
     'window.__INITIAL_STATE__',
     'window.__PRELOADED_STATE__',
-    // imweb/카페24/고도몰 빌더
-    'imweb.me',
-    'cafe24.com/js',
-    'godo.kr/js',
-    'makeshop.co.kr',
-    'shopby.co.kr',
   ];
   if (spaFingerprints.some(fp => text.includes(fp))) return true;
   const sc = (text.match(/<script/gi) || []).length;
   const tc = text.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim().length;
-  // 스크립트 4개 이상 + 텍스트 300자 미만이면 SPA로 판단 (기준 완화)
-  return sc >= 4 && tc < 300;
+  // 스크립트 8개 이상 + 텍스트 200자 미만일 때만 SPA로 판단 (기준 완화 —
+  // 빌더 플랫폼 사이트는 스크립트가 많아도 본문 텍스트가 충분히 길다)
+  return sc >= 8 && tc < 200;
 }
 
 // [B-1/B-3] 전역 프록시 래퍼 (crawlManualUrl 내부 fetchWithProxy 스코프 버그 수정)
@@ -1857,10 +1860,22 @@ async function fetchWithProxyGlobal(targetUrl) {
         text.includes('"contents":null') ||
         text.includes('"status":{"http_code":0}') ||
         (text.includes('login') && text.includes('password') && text.length < 3000);
-      if (text.length > 300 && !isBlocked && !isSPAResponse(text)) return text;
+      // [재설계] 여기서 isSPAResponse로 거르지 않는다 — 호출부(검색결과
+      // 추출, 후보 검증 루프)가 SPA 여부를 보고 신뢰도를 조정하도록 맡긴다.
+      // 과거엔 여기서 SPA로 판정되면 무조건 null을 반환해 호출부가 받는
+      // text 자체가 항상 비어 있었고, 그 결과 빌더 플랫폼(imweb 등) 사이트는
+      // 검증 단계 진입조차 못 하고 폐기되었음.
+      if (text.length > 200 && !isBlocked) return text;
     } catch { /* 다음 프록시 */ }
   }
   return null;
+}
+
+// 빌더 플랫폼 브랜딩 접미사 정리 — 검색결과 title이 "Cellab - 아임웹"처럼
+// 실제 회사명 대신 빌더 플랫폼명으로 끝나 혼동을 주는 경우 표시용으로 제거
+function stripBuilderBranding(title) {
+  if (!title) return title;
+  return title.replace(/\s*[-|·:]\s*(아임웹|imweb|카페24|cafe\s?24|고도몰|godomall|식스샵|sixshop)\s*$/i, '').trim() || title;
 }
 
 // [Task 2] 매칭 신뢰도 지표 계산 (2개 이상 일치 시 confident)
@@ -6685,7 +6700,7 @@ async function runMfdsStep5() {
               ${r.confident ? '<span style="font-size:8px;padding:1px 5px;border-radius:3px;background:rgba(16,185,129,.15);color:var(--grn);font-weight:600;margin-left:3px">✅ 신뢰</span>' : ''}
             </div>
             ${r.matched?.length ? `<div style="font-size:9px;color:var(--cyn);margin-top:1px">일치: ${r.matched.join(' · ')}</div>` : ''}
-            <div class="hp-title" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:9px;color:var(--txt3)">${r.title||'—'}</div>
+            <div class="hp-title" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:9px;color:var(--txt3)">${stripBuilderBranding(r.title)||'—'}</div>
           </div>
           <div class="hp-verify-btns">
             <button class="btn" style="font-size:9px;padding:2px 6px;color:var(--grn);border-color:var(--grn)"
